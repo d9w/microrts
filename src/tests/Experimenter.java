@@ -6,6 +6,13 @@ package tests;
 
 import ai.core.AI;
 import ai.*;
+import ai.evaluation.EvaluationFunction;
+import ai.evaluation.SimpleEvaluationFunction;
+import ai.evaluation.SimpleOptEvaluationFunction;
+import ai.evaluation.SimpleSqrtEvaluationFunction;
+import ai.evaluation.SimpleSqrtEvaluationFunction2;
+import ai.evaluation.SimpleSqrtEvaluationFunction3;
+import ai.evaluation.LanchesterEvaluationFunction;
 import gui.PhysicalGameStateJFrame;
 import gui.PhysicalGameStatePanel;
 
@@ -77,7 +84,14 @@ public class Experimenter {
 
         List<AI> bots2 = new LinkedList<>();
         for(AI bot:bots) bots2.add(bot.clone());
-        
+
+        EvaluationFunction ef1 = new SimpleEvaluationFunction();
+        EvaluationFunction ef2 = new SimpleOptEvaluationFunction();
+        EvaluationFunction ef3 = new SimpleSqrtEvaluationFunction();
+        EvaluationFunction ef4 = new SimpleSqrtEvaluationFunction2();
+        EvaluationFunction ef5 = new SimpleSqrtEvaluationFunction3();
+        EvaluationFunction ef6 = new LanchesterEvaluationFunction();
+
         for (int ai1_idx = 0; ai1_idx < bots.size(); ai1_idx++) 
         {
             for (int ai2_idx = 0; ai2_idx < bots.size(); ai2_idx++) 
@@ -107,7 +121,10 @@ public class Experimenter {
                         if (visualize) w = PhysicalGameStatePanel.newVisualizer(gs, 600, 600, partiallyObservable);
 
                         out.println("MATCH UP: " + ai1 + " vs " + ai2);
-                        
+                        out.format("Upper bounds: %f, %f, %f, %f, %f, %f\n",
+                                   ef1.upperBound(gs),ef2.upperBound(gs),ef3.upperBound(gs),
+                                   ef4.upperBound(gs),ef5.upperBound(gs),ef6.upperBound(gs));
+
                         boolean gameover = false;
                         Trace trace = null;
                         TraceEntry te;
@@ -119,7 +136,11 @@ public class Experimenter {
                         do {
                             if (gs.getTime() % 50 == 0) {
                                 PhysicalGameState npgs = gs.getPhysicalGameState();
-                                out.format("%d,",gs.getTime());
+                                out.format("%d,%f,%f,%f,%f,%f,%f\n",gs.getTime(),
+                                           ef1.evaluate(0, 1, gs), ef2.evaluate(0, 1, gs),
+                                           ef3.evaluate(0, 1, gs), ef4.evaluate(0, 1, gs),
+                                           ef5.evaluate(0, 1, gs), ef6.evaluate(0, 1, gs));
+                                out.format("%d,", gs.getTime());
                                 for (int player=0; player<2; player+=1) {
                                     int nworker = 0;
                                     double whealth = 0.0;
@@ -208,8 +229,8 @@ public class Experimenter {
                         if (w!=null) w.dispose();
                         int winner = gs.winner();
                         out.println("Winner: " + winner + "  in " + gs.getTime() + " cycles");
-                        out.println(ai1 + " : " + ai1.statisticsString());
-                        out.println(ai2 + " : " + ai2.statisticsString());
+                        // out.println(ai1 + " : " + ai1.statisticsString());
+                        // out.println(ai2 + " : " + ai2.statisticsString());
                         out.flush();
                         if (winner == -1) {
                             ties[ai1_idx][ai2_idx]++;
