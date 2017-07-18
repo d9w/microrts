@@ -120,10 +120,15 @@ public class Experimenter {
                         PhysicalGameStateJFrame w = null;
                         if (visualize) w = PhysicalGameStatePanel.newVisualizer(gs, 600, 600, partiallyObservable);
 
-                        out.println("MATCH UP: " + ai1 + " vs " + ai2);
-                        out.format("Upper bounds: %f, %f, %f, %f, %f, %f\n",
-                                   ef1.upperBound(gs),ef2.upperBound(gs),ef3.upperBound(gs),
-                                   ef4.upperBound(gs),ef5.upperBound(gs),ef6.upperBound(gs));
+                        float ub1 = ef1.upperBound(gs);
+                        float ub2 = ef2.upperBound(gs);
+                        float ub3 = ef3.upperBound(gs);
+                        float ub4 = ef4.upperBound(gs);
+                        float ub5 = ef5.upperBound(gs);
+                        float ub6 = ef6.upperBound(gs);
+                        // out.println("MATCH UP: " + ai1 + " vs " + ai2);
+                        // out.format("Upper bounds: %f, %f, %f, %f, %f, %f\n",
+                                   // ub1, ub2, ub3, ub4, ub5, ub6);
 
                         boolean gameover = false;
                         Trace trace = null;
@@ -136,32 +141,14 @@ public class Experimenter {
                         do {
                             if (gs.getTime() % 50 == 0) {
                                 PhysicalGameState npgs = gs.getPhysicalGameState();
-                                out.format("%d,%f,%f,%f,%f,%f,%f\n",gs.getTime(),
-                                           ef1.evaluate(0, 1, gs), ef2.evaluate(0, 1, gs),
-                                           ef3.evaluate(0, 1, gs), ef4.evaluate(0, 1, gs),
-                                           ef5.evaluate(0, 1, gs), ef6.evaluate(0, 1, gs));
-                                out.format("%d,", gs.getTime());
-                                for (int player=0; player<2; player+=1) {
-                                    int nworker = 0;
-                                    double whealth = 0.0;
-                                    double wcost = 0.0;
-                                    double wresources = 0.0;
-                                    for(Unit u:npgs.getUnits()) {
-                                        if (u.getPlayer()==player) {
-                                            nworker += 1;
-                                            whealth += u.getHitPoints() / u.getMaxHitPoints();
-                                            wcost += u.getCost();
-                                            wresources += u.getResources();
-                                        }
-                                    }
-                                    whealth /= nworker;
-                                    wcost /= nworker;
-                                    wresources /= nworker;
-                                    out.format("%d, %d, %f, %f, %f,",
-                                               gs.getPlayer(player).getResources(),
-                                               nworker, whealth, wcost, wresources);
-                                }
-                                out.format("\n");
+                                out.format("%f, %f, %f, %f, %f, %f, %f\n",
+                                           (float) gs.getTime()/max_cycles,
+                                           (ef1.evaluate(0, 1, gs)+ub1)/(2*ub1),
+                                           (ef2.evaluate(0, 1, gs)+ub2)/(2*ub2),
+                                           (ef3.evaluate(0, 1, gs)+ub3)/(2*ub3),
+                                           (ef4.evaluate(0, 1, gs)+ub4)/(2*ub4),
+                                           (ef5.evaluate(0, 1, gs)+ub5)/(2*ub5),
+                                           (ef6.evaluate(0, 1, gs)+ub6)/(2*ub6));
                             }
                             if (GC_EACH_FRAME) System.gc();
                             PlayerAction pa1 = null, pa2 = null;
@@ -257,60 +244,60 @@ public class Experimenter {
             }
         }
 
-        out.println("Wins: ");
-        for (int ai1_idx = 0; ai1_idx < bots.size(); ai1_idx++) {
-            for (int ai2_idx = 0; ai2_idx < bots.size(); ai2_idx++) {
-                out.print(wins[ai1_idx][ai2_idx] + ", ");
-            }
-            out.println("");
-        }
-        out.println("Ties: ");
-        for (int ai1_idx = 0; ai1_idx < bots.size(); ai1_idx++) {
-            for (int ai2_idx = 0; ai2_idx < bots.size(); ai2_idx++) {
-                out.print(ties[ai1_idx][ai2_idx] + ", ");
-            }
-            out.println("");
-        }
-        out.println("Loses: ");
-        for (int ai1_idx = 0; ai1_idx < bots.size(); ai1_idx++) {
-            for (int ai2_idx = 0; ai2_idx < bots.size(); ai2_idx++) {
-                out.print(loses[ai1_idx][ai2_idx] + ", ");
-            }
-            out.println("");
-        }        
-        out.println("Win average time: ");
-        for (int ai1_idx = 0; ai1_idx < bots.size(); ai1_idx++) {
-            for (int ai2_idx = 0; ai2_idx < bots.size(); ai2_idx++) {
-                if (wins[ai1_idx][ai2_idx]>0) {
-                    out.print((win_time[ai1_idx][ai2_idx]/wins[ai1_idx][ai2_idx]) + ", ");
-                } else {
-                    out.print("-, ");
-                }
-            }
-            out.println("");
-        }
-        out.println("Tie average time: ");
-        for (int ai1_idx = 0; ai1_idx < bots.size(); ai1_idx++) {
-            for (int ai2_idx = 0; ai2_idx < bots.size(); ai2_idx++) {
-                if (ties[ai1_idx][ai2_idx]>0) {
-                    out.print((tie_time[ai1_idx][ai2_idx]/ties[ai1_idx][ai2_idx]) + ", ");
-                } else {
-                    out.print("-, ");
-                }
-            }
-            out.println("");
-        }
-        out.println("Lose average time: ");
-        for (int ai1_idx = 0; ai1_idx < bots.size(); ai1_idx++) {
-            for (int ai2_idx = 0; ai2_idx < bots.size(); ai2_idx++) {
-                if (loses[ai1_idx][ai2_idx]>0) {
-                    out.print((lose_time[ai1_idx][ai2_idx]/loses[ai1_idx][ai2_idx]) + ", ");
-                } else {
-                    out.print("-, ");
-                }
-            }
-            out.println("");
-        }              
+        // out.println("Wins: ");
+        // for (int ai1_idx = 0; ai1_idx < bots.size(); ai1_idx++) {
+        //     for (int ai2_idx = 0; ai2_idx < bots.size(); ai2_idx++) {
+        //         out.print(wins[ai1_idx][ai2_idx] + ", ");
+        //     }
+        //     out.println("");
+        // }
+        // out.println("Ties: ");
+        // for (int ai1_idx = 0; ai1_idx < bots.size(); ai1_idx++) {
+        //     for (int ai2_idx = 0; ai2_idx < bots.size(); ai2_idx++) {
+        //         out.print(ties[ai1_idx][ai2_idx] + ", ");
+        //     }
+        //     out.println("");
+        // }
+        // out.println("Loses: ");
+        // for (int ai1_idx = 0; ai1_idx < bots.size(); ai1_idx++) {
+        //     for (int ai2_idx = 0; ai2_idx < bots.size(); ai2_idx++) {
+        //         out.print(loses[ai1_idx][ai2_idx] + ", ");
+        //     }
+        //     out.println("");
+        // }        
+        // out.println("Win average time: ");
+        // for (int ai1_idx = 0; ai1_idx < bots.size(); ai1_idx++) {
+        //     for (int ai2_idx = 0; ai2_idx < bots.size(); ai2_idx++) {
+        //         if (wins[ai1_idx][ai2_idx]>0) {
+        //             out.print((win_time[ai1_idx][ai2_idx]/wins[ai1_idx][ai2_idx]) + ", ");
+        //         } else {
+        //             out.print("-, ");
+        //         }
+        //     }
+        //     out.println("");
+        // }
+        // out.println("Tie average time: ");
+        // for (int ai1_idx = 0; ai1_idx < bots.size(); ai1_idx++) {
+        //     for (int ai2_idx = 0; ai2_idx < bots.size(); ai2_idx++) {
+        //         if (ties[ai1_idx][ai2_idx]>0) {
+        //             out.print((tie_time[ai1_idx][ai2_idx]/ties[ai1_idx][ai2_idx]) + ", ");
+        //         } else {
+        //             out.print("-, ");
+        //         }
+        //     }
+        //     out.println("");
+        // }
+        // out.println("Lose average time: ");
+        // for (int ai1_idx = 0; ai1_idx < bots.size(); ai1_idx++) {
+        //     for (int ai2_idx = 0; ai2_idx < bots.size(); ai2_idx++) {
+        //         if (loses[ai1_idx][ai2_idx]>0) {
+        //             out.print((lose_time[ai1_idx][ai2_idx]/loses[ai1_idx][ai2_idx]) + ", ");
+        //         } else {
+        //             out.print("-, ");
+        //         }
+        //     }
+        //     out.println("");
+        // }              
         out.flush();
     }
 }

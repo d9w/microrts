@@ -42,7 +42,7 @@ public class StateEvalDataGen {
     
     public static void main(String args[]) throws Exception 
     {
-    	boolean CONTINUING = true;
+    	boolean CONTINUING = false;
         int TIME = 100;
         int MAX_ACTIONS = 100;
         int MAX_PLAYOUTS = -1;
@@ -106,17 +106,17 @@ public class StateEvalDataGen {
         maps.clear();
         maps.add(PhysicalGameState.load("maps/8x8/basesWorkers8x8.xml",utt));
         Experimenter.runExperiments(bots, maps, utt, 10, 3000, 300, false, out);
-      
+
         maps.clear();
-        maps.add(PhysicalGameState.load("maps/12x12/melee12x12mixed12.xml",utt));
+        maps.add(PhysicalGameState.load("maps/8x8/basesWorkers8x8Obstacle.xml",utt));
         Experimenter.runExperiments(bots, maps, utt, 10, 3000, 300, false, out);
 
         maps.clear();
-        maps.add(PhysicalGameState.load("maps/8x8/melee8x8mixed6.xml",utt));
+        maps.add(PhysicalGameState.load("maps/8x8/basesWorkersBarracks8x8.xml",utt));
         Experimenter.runExperiments(bots, maps, utt, 10, 3000, 300, false, out);
 
         maps.clear();
-        maps.add(PhysicalGameState.load("maps/melee4x4light2.xml",utt));
+        maps.add(PhysicalGameState.load("maps/8x8/melee8x8Mixed6.xml",utt));
         Experimenter.runExperiments(bots, maps, utt, 10, 3000, 300, false, out);
     }
 }
