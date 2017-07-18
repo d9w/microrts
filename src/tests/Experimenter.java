@@ -26,7 +26,7 @@ import rts.PhysicalGameState;
 import rts.PlayerAction;
 import rts.Trace;
 import rts.TraceEntry;
-import rts.units.UnitTypeTable;
+import rts.units.*;
 import util.XMLWriter;
 
 /**
@@ -117,6 +117,29 @@ public class Experimenter {
                             trace.addEntry(te);
                         }
                         do {
+                            if (gs.getTime() % 50 == 0) {
+                                PhysicalGameState npgs = gs.getPhysicalGameState();
+                                out.format("%d,",gs.getTime());
+                                for (int player=0; player<2; player+=1) {
+                                    int nworker = 0;
+                                    double whealth = 0.0;
+                                    double wcost = 0.0;
+                                    double wresources = 0.0;
+                                    for(Unit u:npgs.getUnits()) {
+                                        nworker += 1;
+                                        whealth += u.getHitPoints() / u.getMaxHitPoints();
+                                        wcost += u.getCost();
+                                        wresources += u.getResources();
+                                    }
+                                    whealth /= nworker;
+                                    wcost /= nworker;
+                                    wresources /= nworker;
+                                    out.format("%d, %d, %f, %f, %f,",
+                                               gs.getPlayer(0).getResources(),
+                                               nworker, whealth, wcost, wresources);
+                                }
+                                out.format("\n");
+                            }
                             if (GC_EACH_FRAME) System.gc();
                             PlayerAction pa1 = null, pa2 = null;
                             if (partiallyObservable) {
