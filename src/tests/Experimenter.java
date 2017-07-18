@@ -126,16 +126,18 @@ public class Experimenter {
                                     double wcost = 0.0;
                                     double wresources = 0.0;
                                     for(Unit u:npgs.getUnits()) {
-                                        nworker += 1;
-                                        whealth += u.getHitPoints() / u.getMaxHitPoints();
-                                        wcost += u.getCost();
-                                        wresources += u.getResources();
+                                        if (u.getPlayer()==player) {
+                                            nworker += 1;
+                                            whealth += u.getHitPoints() / u.getMaxHitPoints();
+                                            wcost += u.getCost();
+                                            wresources += u.getResources();
+                                        }
                                     }
                                     whealth /= nworker;
                                     wcost /= nworker;
                                     wresources /= nworker;
                                     out.format("%d, %d, %f, %f, %f,",
-                                               gs.getPlayer(0).getResources(),
+                                               gs.getPlayer(player).getResources(),
                                                nworker, whealth, wcost, wresources);
                                 }
                                 out.format("\n");
