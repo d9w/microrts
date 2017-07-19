@@ -98,7 +98,7 @@ public class StateEvalDataGen {
         	bots = bots2;
         }
         
-        PrintStream out = new PrintStream(new File("board_results.txt"));
+        PrintStream out = new PrintStream(new File("bresults.txt"));
         
         // Separate the matchs by map:
         List<PhysicalGameState> maps = new LinkedList<PhysicalGameState>();        
