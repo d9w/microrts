@@ -85,13 +85,6 @@ public class Experimenter {
         List<AI> bots2 = new LinkedList<>();
         for(AI bot:bots) bots2.add(bot.clone());
 
-        EvaluationFunction ef1 = new SimpleEvaluationFunction();
-        EvaluationFunction ef2 = new SimpleOptEvaluationFunction();
-        EvaluationFunction ef3 = new SimpleSqrtEvaluationFunction();
-        EvaluationFunction ef4 = new SimpleSqrtEvaluationFunction2();
-        EvaluationFunction ef5 = new SimpleSqrtEvaluationFunction3();
-        EvaluationFunction ef6 = new LanchesterEvaluationFunction();
-
         for (int ai1_idx = 0; ai1_idx < bots.size(); ai1_idx++) 
         {
             for (int ai2_idx = 0; ai2_idx < bots.size(); ai2_idx++) 
@@ -103,7 +96,6 @@ public class Experimenter {
                 if (skip_self_play && ai1_idx==ai2_idx) continue;
                 int m=0;
                 for(PhysicalGameState pgs:maps) {
-                    
                     for (int i = 0; i < iterations; i++) {
                     	//cloning just in case an AI has a memory leak
                     	//by using a clone, it is discarded, along with the leaked memory,
@@ -120,12 +112,6 @@ public class Experimenter {
                         PhysicalGameStateJFrame w = null;
                         if (visualize) w = PhysicalGameStatePanel.newVisualizer(gs, 600, 600, partiallyObservable);
 
-                        float ub1 = ef1.upperBound(gs);
-                        float ub2 = ef2.upperBound(gs);
-                        float ub3 = ef3.upperBound(gs);
-                        float ub4 = ef4.upperBound(gs);
-                        float ub5 = ef5.upperBound(gs);
-                        float ub6 = ef6.upperBound(gs);
                         // out.println("MATCH UP: " + ai1 + " vs " + ai2);
                         // out.format("Upper bounds: %f, %f, %f, %f, %f, %f\n",
                                    // ub1, ub2, ub3, ub4, ub5, ub6);
@@ -140,15 +126,36 @@ public class Experimenter {
                         }
                         do {
                             if (gs.getTime() % 50 == 0) {
+                                double world_info[][] = new double[pgs.getWidth()][pgs.getHeight()];
                                 PhysicalGameState npgs = gs.getPhysicalGameState();
-                                out.format("%f, %f, %f, %f, %f, %f, %f\n",
-                                           (float) gs.getTime()/max_cycles,
-                                           (ef1.evaluate(0, 1, gs)+ub1)/(2*ub1),
-                                           (ef2.evaluate(0, 1, gs)+ub2)/(2*ub2),
-                                           (ef3.evaluate(0, 1, gs)+ub3)/(2*ub3),
-                                           (ef4.evaluate(0, 1, gs)+ub4)/(2*ub4),
-                                           (ef5.evaluate(0, 1, gs)+ub5)/(2*ub5),
-                                           (ef6.evaluate(0, 1, gs)+ub6)/(2*ub6));
+                                // out.format("%f, %f, %f, %f, %f, %f, %f\n");
+                                for(Unit u:npgs.getUnits()) {
+                                    double base = 1;
+                                    if (u.getPlayer()==1) {
+                                        base = -1;
+                                    }
+                                    int type = 0;
+                                    if (u.getType() == utt.getUnitType("Base")) {
+                                        type = 1;
+                                    } else if(u.getType() == utt.getUnitType("Barracks")) {
+                                        type = 2;
+                                    } else if(u.getType() == utt.getUnitType("Worker")) {
+                                        type = 3;
+                                    } else if(u.getType() == utt.getUnitType("Light")) {
+                                        type = 4;
+                                    } else if(u.getType() == utt.getUnitType("Ranged")) {
+                                        type = 5;
+                                    } else if(u.getType() == utt.getUnitType("Heavy")) {
+                                        type = 6;
+                                    }
+                                    world_info[u.getX()][u.getY()] = base*(type+u.getHitPoints()/u.getMaxHitPoints())/6.0;
+                                }
+                                for (int x=0; x<pgs.getWidth(); x++) {
+                                    for (int y=0; y<pgs.getHeight(); y++) {
+                                        out.format("%f, ", world_info[x][y]);
+                                    }
+                                }
+                                out.format("%n");
                             }
                             if (GC_EACH_FRAME) System.gc();
                             PlayerAction pa1 = null, pa2 = null;

@@ -53,21 +53,21 @@ public class StateEvalDataGen {
         List<AI> bots = new LinkedList<>();
         UnitTypeTable utt = new UnitTypeTable();
         
-        bots.add(new RandomAI());
-        bots.add(new RandomBiasedAI());
-        bots.add(new LightRush(utt, new BFSPathFinding()));
-        bots.add(new RangedRush(utt, new BFSPathFinding()));
-        bots.add(new WorkerRush(utt, new BFSPathFinding()));
-        bots.add(new PortfolioAI(new AI[]{new WorkerRush(utt, new BFSPathFinding()),
-                                          new LightRush(utt, new BFSPathFinding()),
-                                          new RangedRush(utt, new BFSPathFinding()),
-                                          new RandomBiasedAI()}, 
-                                 new boolean[]{true,true,true,false}, 
-                                 TIME, MAX_PLAYOUTS, PLAYOUT_TIME*4, new SimpleSqrtEvaluationFunction3()));
+        // bots.add(new RandomAI());
+        // bots.add(new RandomBiasedAI());
+        // bots.add(new LightRush(utt, new BFSPathFinding()));
+        // bots.add(new RangedRush(utt, new BFSPathFinding()));
+        // bots.add(new WorkerRush(utt, new BFSPathFinding()));
+        // bots.add(new PortfolioAI(new AI[]{new WorkerRush(utt, new BFSPathFinding()),
+        //                                   new LightRush(utt, new BFSPathFinding()),
+        //                                   new RangedRush(utt, new BFSPathFinding()),
+        //                                   new RandomBiasedAI()}, 
+        //                          new boolean[]{true,true,true,false}, 
+        //                          TIME, MAX_PLAYOUTS, PLAYOUT_TIME*4, new SimpleSqrtEvaluationFunction3()));
         
-        bots.add(new IDRTMinimax(TIME, new SimpleSqrtEvaluationFunction3()));
-        bots.add(new IDRTMinimaxRandomized(TIME, RANDOMIZED_AB_REPEATS, new SimpleSqrtEvaluationFunction3()));
-        bots.add(new IDABCD(TIME, MAX_PLAYOUTS, new LightRush(utt, new GreedyPathFinding()), PLAYOUT_TIME, new SimpleSqrtEvaluationFunction3(), false));
+        // bots.add(new IDRTMinimax(TIME, new SimpleSqrtEvaluationFunction3()));
+        // bots.add(new IDRTMinimaxRandomized(TIME, RANDOMIZED_AB_REPEATS, new SimpleSqrtEvaluationFunction3()));
+        // bots.add(new IDABCD(TIME, MAX_PLAYOUTS, new LightRush(utt, new GreedyPathFinding()), PLAYOUT_TIME, new SimpleSqrtEvaluationFunction3(), false));
 
         bots.add(new MonteCarlo(TIME, PLAYOUT_TIME, MAX_PLAYOUTS, new RandomBiasedAI(), new SimpleSqrtEvaluationFunction3()));
         bots.add(new MonteCarlo(TIME, PLAYOUT_TIME, MAX_PLAYOUTS, MAX_ACTIONS, new RandomBiasedAI(), new SimpleSqrtEvaluationFunction3()));
@@ -98,7 +98,7 @@ public class StateEvalDataGen {
         	bots = bots2;
         }
         
-        PrintStream out = new PrintStream(new File("results.txt"));
+        PrintStream out = new PrintStream(new File("board_results.txt"));
         
         // Separate the matchs by map:
         List<PhysicalGameState> maps = new LinkedList<PhysicalGameState>();        
