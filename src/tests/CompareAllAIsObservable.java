@@ -109,6 +109,6 @@ public class CompareAllAIsObservable {
         maps.add(PhysicalGameState.load("maps/12x12/complexBasesWorkers12x12.xml",utt));
         maps.add(PhysicalGameState.load("maps/12x12/melee12x12Mixed12.xml",utt));
         maps.add(PhysicalGameState.load("maps/16x16/basesWorkers16x16A.xml",utt));
-        Experimenter.runExperiments(bots, maps, utt, 2, 3000, 300, true, out);
+        Experimenter.runExperiments(bots, maps, utt, 2, 3000, 300, false, out);
     }
 }
