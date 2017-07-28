@@ -39,7 +39,7 @@ import ai.core.InterruptibleAI;
  * @author santi
  */
 public class CompareAllAIsObservable {
-    
+
     public static void main(String args[]) throws Exception 
     {
     	boolean CONTINUING = true;
@@ -49,10 +49,10 @@ public class CompareAllAIsObservable {
         int PLAYOUT_TIME = 100;
         int MAX_DEPTH = 10;
         int RANDOMIZED_AB_REPEATS = 10;
-        
+
         List<AI> bots = new LinkedList<>();
         UnitTypeTable utt = new UnitTypeTable();
-        
+
         bots.add(new RandomAI());
         bots.add(new RandomBiasedAI());
         bots.add(new LightRush(utt, new BFSPathFinding()));
@@ -64,7 +64,7 @@ public class CompareAllAIsObservable {
                                           new RandomBiasedAI()}, 
                                  new boolean[]{true,true,true,false}, 
                                  TIME, MAX_PLAYOUTS, PLAYOUT_TIME*4, new SimpleSqrtEvaluationFunction3()));
-        
+
         bots.add(new IDRTMinimax(TIME, new SimpleSqrtEvaluationFunction3()));
         bots.add(new IDRTMinimaxRandomized(TIME, RANDOMIZED_AB_REPEATS, new SimpleSqrtEvaluationFunction3()));
         bots.add(new IDABCD(TIME, MAX_PLAYOUTS, new LightRush(utt, new GreedyPathFinding()), PLAYOUT_TIME, new SimpleSqrtEvaluationFunction3(), false));
@@ -89,7 +89,7 @@ public class CompareAllAIsObservable {
         			if (bot instanceof InterruptibleAI) {
         				bots2.add(new ContinuingAI(bot));
         			} else {
-        				bots2.add(new PseudoContinuingAI((AIWithComputationBudget)bot));        				
+        				bots2.add(new PseudoContinuingAI((AIWithComputationBudget)bot));
         			}
         		} else {
         			bots2.add(bot);
@@ -97,27 +97,18 @@ public class CompareAllAIsObservable {
         	}
         	bots = bots2;
         }
-        
+
         PrintStream out = new PrintStream(new File("results.txt"));
-        
+
         // Separate the matchs by map:
-        List<PhysicalGameState> maps = new LinkedList<PhysicalGameState>();        
+        List<PhysicalGameState> maps = new LinkedList<PhysicalGameState>();
 
         maps.clear();
         maps.add(PhysicalGameState.load("maps/8x8/basesWorkers8x8.xml",utt));
-//        Experimenter.runExperimentsPartiallyObservable(bots, maps, 10, 3000, 300, true, out);
-        Experimenter.runExperiments(bots, maps, utt, 10, 3000, 300, true, out);
-      
-        maps.clear();
-        maps.add(PhysicalGameState.load("maps/12x12/melee12x12mixed12.xml",utt));
-        Experimenter.runExperiments(bots, maps, utt, 10, 3000, 300, true, out);
-
-        maps.clear();
-        maps.add(PhysicalGameState.load("maps/8x8/melee8x8mixed6.xml",utt));
-        Experimenter.runExperiments(bots, maps, utt, 10, 3000, 300, true, out);
-
-        maps.clear();
-        maps.add(PhysicalGameState.load("maps/melee4x4light2.xml",utt));
-        Experimenter.runExperiments(bots, maps, utt, 10, 3000, 300, true, out);
+        maps.add(PhysicalGameState.load("maps/8x8/basesWorkers8x8Obstacle.xml",utt));
+        maps.add(PhysicalGameState.load("maps/12x12/complexBasesWorkers12x12.xml",utt));
+        maps.add(PhysicalGameState.load("maps/12x12/melee12x12Mixed12.xml",utt));
+        maps.add(PhysicalGameState.load("maps/16x16/basesWorkers16x16A.xml",utt));
+        Experimenter.runExperiments(bots, maps, utt, 2, 3000, 300, true, out);
     }
 }
