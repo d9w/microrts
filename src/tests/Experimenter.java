@@ -196,7 +196,7 @@ public class Experimenter {
                         }
                         if (w!=null) w.dispose();
                         int winner = gs.winner();
-                        out.println(ai1_idx + "," + ai2_idx + "," + winner + "," + gs.getTime());
+                        out.println(ai1_idx + "," + ai2_idx + "," + winner + "," + m + "," + i + "," + gs.getTime());
                         out.flush();
                     }
                     m++;
