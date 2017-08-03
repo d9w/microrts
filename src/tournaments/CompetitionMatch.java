@@ -7,8 +7,10 @@ import ai.core.InterruptibleAI;
 import ai.RandomAI;
 import ai.abstraction.LightRush;
 import ai.abstraction.WorkerRush;
+import ai.abstraction.HeavyRush;
 import ai.abstraction.pathfinding.BFSPathFinding;
 import ai.evaluation.SimpleSqrtEvaluationFunction3;
+import ai.wilson.GRNAI;
 import gui.PhysicalGameStateJFrame;
 import gui.PhysicalGameStatePanel;
 import java.io.File;
@@ -91,6 +93,7 @@ public class CompetitionMatch {
                         pa1 = ai1.getAction(0, gs);
                         AI1end = System.currentTimeMillis();
                     }catch(Exception e) {
+                        e.printStackTrace();
                         crashed = 0;
                         break;
                     }
@@ -100,6 +103,7 @@ public class CompetitionMatch {
                         pa2 = ai2.getAction(1, gs);
                         AI2end = System.currentTimeMillis();
                     }catch(Exception e) {
+                        e.printStackTrace();
                         crashed = 1;
                         break;
                     }
@@ -149,7 +153,6 @@ public class CompetitionMatch {
 
         List<PhysicalGameState> maps = new LinkedList<PhysicalGameState>();
         maps.clear();
-        maps.add(PhysicalGameState.load("maps/8x8/basesWorkers8x8.xml",utt));
         maps.add(PhysicalGameState.load("maps/8x8/basesWorkers8x8A.xml",utt));
         maps.add(PhysicalGameState.load("maps/16x16/basesWorkers16x16A.xml",utt));
         maps.add(PhysicalGameState.load("maps/BWDistantResources32x32.xml",utt));
@@ -157,8 +160,8 @@ public class CompetitionMatch {
 
         int[] gameLengths = {3000, 4000, 5000, 6000, 8000};
 
-        double score = runMatches(new LightRush(utt, new BFSPathFinding()),
-                                  new WorkerRush(utt, new BFSPathFinding()),
+        double score = runMatches(new GRNAI(utt),
+                                  new HeavyRush(utt, new BFSPathFinding()),
                                   maps, gameLengths, utt);
         System.out.println(score);
     }
