@@ -9,12 +9,7 @@ import java.util.Random;
 
 
 import evaluators.GRNGenomeEvaluator;
-import evaluators.IntertwinedSpiralsSubsequence;
-import evaluators.IntertwinedSpiralsVariableTime;
-import evaluators.DoublingFrequencyEvaluator;
-import evaluators.LowPassFilterEvaluator;
-import evaluators.CoverageControl;
-import evaluators.IntertwinedSpirals;
+import evaluators.RTSMatch;
 import grn.GRNProtein;
 import operators.GRNAddGeneMutationOperator;
 import operators.GRNAligningCrossoverOperator_ParentCountProb;
@@ -665,19 +660,13 @@ public class Evolver {
 		//e.greatActivated=false;
 		
 		if (!customExpName) {
-			e.evaluator=new CoverageControl( args, e.rng );//new MichalSignalProcessExp3();
-			//e.evaluator = new IntertwinedSpirals( args );
-			e.experienceName=e.evaluator.name;
+			e.evaluator=new RTSMatch();
 		} else {
-			if( e.experienceName.compareTo("DoublingFrequencyEvaluator") == 0) e.evaluator=new DoublingFrequencyEvaluator();  
-			else if( e.experienceName.compareTo("LowPassFilter") == 0 ) e.evaluator=new LowPassFilterEvaluator();  
-			else if( e.experienceName.compareTo("CoverageControl") == 0 ) e.evaluator=new CoverageControl( args, e.rng );  
-			else if( e.experienceName.compareTo("IntertwinedSpirals") == 0 ) e.evaluator=new IntertwinedSpirals( args );
-			else if( e.experienceName.compareTo("IntertwinedSpiralsSubsequence") == 0 ) e.evaluator=new IntertwinedSpiralsSubsequence();
-			else if( e.experienceName.compareTo("IntertwinedSpiralsVariableTime") == 0 ) e.evaluator=new IntertwinedSpiralsVariableTime( args );
+			if( e.experienceName.compareTo("RTSMatch") == 0 ) e.evaluator=new RTSMatch();
 			else System.out.println("!!! WARNING: Unknown experience name "+e.experienceName+" !!!");
 		}
-		
+    e.experienceName=e.evaluator.name;
+
 		if (e.greatActivated) {
 			System.out.println("GREAT!");
 			System.out.println("Xover: " + xover);

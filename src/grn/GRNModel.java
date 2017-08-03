@@ -108,20 +108,13 @@ public class GRNModel implements Serializable {
 					// Calculating enhancing and inhibiting factor for the current protein
 					for (k=0; k<proteins.size(); k++) {
 						if (proteins.get(k).type!=GRNProtein.OUTPUT_PROTEIN) {
-                enhance+=proteins.get(k).concentration*enhanceMatching[k][j];
-                inhibit+=proteins.get(k).concentration*inhibitMatching[k][j];
+							enhance+=proteins.get(k).concentration*enhanceMatching[k][j];
+							inhibit+=proteins.get(k).concentration*inhibitMatching[k][j];
 						}
 					}
 					// if (j=5) cout << enhance << "   " << inhibit << endl;
 					// Calculating the next concentration of current protein 
-          // newconc =  Math.max(0.0,proteins.get(j).concentration+delta/proteins.size()*(enhance-inhibit));
-          double newconc =  Math.max(0.0,proteins.get(j).concentration+
-                                     delta/proteins.size()*(enhance-inhibit));
-					nextProteins.add(new GRNProtein(proteins.get(j).id,
-                                          proteins.get(j).type,
-                                          newconc,
-                                          proteins.get(j).enhancer,
-                                          proteins.get(j).inhibiter));
+					nextProteins.add(new GRNProtein(proteins.get(j).id, proteins.get(j).type, Math.max(0.0,proteins.get(j).concentration+delta/proteins.size()*(enhance-inhibit)), proteins.get(j).enhancer, proteins.get(j).inhibiter));
 				}
 			}
 
@@ -158,12 +151,18 @@ public class GRNModel implements Serializable {
 		int nbProteins=proteins.size();
 		for (int dup=0; dup<nbDup; dup++) {
 			for (int i=0; i<nbProteins; i++) {
+/*				proteins.add(new GRNProtein(
+						Math.random()>mutProb?proteins.get(i).id:(int)(Math.random()*GRNProtein.IDSIZE),
+								proteins.get(i).type,
+								proteins.get(i).concentration,
+								Math.random()>mutProb?proteins.get(i).enhancer:(int)(Math.random()*GRNProtein.IDSIZE),
+										Math.random()>mutProb?proteins.get(i).inhibiter:(int)(Math.random()*GRNProtein.IDSIZE)));*/
 				proteins.add(new GRNProtein(
-                                    rng.nextDouble()>mutProb?proteins.get(i).id:(rng.nextDouble()),
-                                    proteins.get(i).type,
-                                    proteins.get(i).concentration,
-                                    rng.nextDouble()>mutProb?proteins.get(i).enhancer:(rng.nextDouble()),
-                                    rng.nextDouble()>mutProb?proteins.get(i).inhibiter:(rng.nextDouble())));
+						rng.nextDouble()>mutProb?proteins.get(i).id:(int)(rng.nextDouble()*GRNProtein.IDSIZE),
+								proteins.get(i).type,
+								proteins.get(i).concentration,
+								rng.nextDouble()>mutProb?proteins.get(i).enhancer:(int)(rng.nextDouble()*GRNProtein.IDSIZE),
+										rng.nextDouble()>mutProb?proteins.get(i).inhibiter:(int)(rng.nextDouble()*GRNProtein.IDSIZE)));
 				
 			}
 		}
@@ -174,22 +173,20 @@ public class GRNModel implements Serializable {
 
 	private void updateSignatures() {
 		// calculating signatures
-    double maxEnhance=0.0;
-    double maxInhibit=0.0;
 		enhanceMatching = new double[proteins.size()][proteins.size()];
 		inhibitMatching = new double[proteins.size()][proteins.size()];
 		for (int j=0; j<proteins.size(); j++) {
 			for (int k=0; k<proteins.size(); k++) {
-				enhanceMatching[j][k] = 1.0-Math.abs(proteins.get(j).enhancer-proteins.get(k).id);
+				enhanceMatching[j][k] = GRNProtein.IDSIZE-Math.abs(proteins.get(j).enhancer-proteins.get(k).id);
 				maxEnhance=Math.max(maxEnhance, enhanceMatching[j][k]);
-				inhibitMatching[j][k] = 1.0-Math.abs(proteins.get(j).inhibiter-proteins.get(k).id);
+				inhibitMatching[j][k] = GRNProtein.IDSIZE-Math.abs(proteins.get(j).inhibiter-proteins.get(k).id);
 				maxInhibit=Math.max(maxInhibit, inhibitMatching[j][k]);
 			}
 		}
 		for (int j=0; j<proteins.size(); j++) {
 			for (int k=0; k<proteins.size(); k++) {
-          enhanceMatching[j][k]=Math.exp(beta*(double)enhanceMatching[j][k]-(double)maxEnhance);
-          inhibitMatching[j][k]=Math.exp(beta*(double)inhibitMatching[j][k]-(double)maxInhibit);
+				enhanceMatching[j][k]=Math.exp(beta*(double)enhanceMatching[j][k]-(double)maxEnhance);
+				inhibitMatching[j][k]=Math.exp(beta*(double)inhibitMatching[j][k]-(double)maxInhibit);
 			}
 		}
 	}

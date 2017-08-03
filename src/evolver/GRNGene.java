@@ -13,9 +13,9 @@ public class GRNGene implements Comparable<Object> {
 	protected Long geneId;
 	protected boolean isDisabled=false;
 
-	protected double protId;
-	protected double protEnh;
-	protected double protInh;
+	protected int protId;
+	protected int protEnh;
+	protected int protInh;
 	protected int protType;
 	protected int connectTo;
 	
@@ -41,7 +41,7 @@ public class GRNGene implements Comparable<Object> {
 		this(false, 0, 0, 0, GRNProtein.REGULATORY_PROTEIN, 0);
 	}
 	
-	public GRNGene(boolean nIsDisabled, double nProtId, double nProtEnh, double nProtInh, int nProtType, int nConnectTo) {
+	public GRNGene(boolean nIsDisabled, int nProtId, int nProtEnh, int nProtInh, int nProtType, int nConnectTo) {
 		geneId=nextId++;
 		isDisabled=nIsDisabled;
 		protId=nProtId;
@@ -51,11 +51,11 @@ public class GRNGene implements Comparable<Object> {
 		connectTo=nConnectTo;
 	}
 	
-	public GRNGene(double nProtId, double nProtEnh, double nProtInh) {
+	public GRNGene(int nProtId, int nProtEnh, int nProtInh) {
 		this(false, nProtId, nProtEnh, nProtInh, GRNProtein.REGULATORY_PROTEIN, 0);
 	}
 	
-	public GRNGene(boolean nIsDisabled, double nProtId, double nProtEnh, double nProtInh) {
+	public GRNGene(boolean nIsDisabled, int nProtId, int nProtEnh, int nProtInh) {
 		this(nIsDisabled, nProtId, nProtEnh, nProtInh, GRNProtein.REGULATORY_PROTEIN, 0);
 	}
 	
@@ -71,12 +71,12 @@ public class GRNGene implements Comparable<Object> {
 		if (o instanceof GRNGene) {
 			GRNGene g = (GRNGene) o;
 			if (g.protType==protType) {
-          return (int) Math.floor(100*(protId-g.protId));
+				return protId-g.protId;
 			} else {
-          return 100;
+				return Integer.MAX_VALUE;
 			}
 		} else {
-        return 100;
+			return Integer.MAX_VALUE;
 		}
 	}
 	
@@ -86,8 +86,8 @@ public class GRNGene implements Comparable<Object> {
 		}
 		if (g.protType==protType) {
 			return (protCoef*(double)(Math.abs(protId-g.protId))+
-              enhCoef*(double)(Math.abs(protEnh-g.protEnh))+
-              inhCoef*(double)(Math.abs(protInh-g.protInh)));
+					enhCoef*(double)(Math.abs(protEnh-g.protEnh))+
+					inhCoef*(double)(Math.abs(protInh-g.protInh)))/GRNProtein.IDSIZE;
 		} else {
 			return 1.0;
 		}
@@ -97,27 +97,27 @@ public class GRNGene implements Comparable<Object> {
 		return connectTo;
 	}
 	
-	public double getProtId() {
+	public int getProtId() {
 		return protId;
 	}
 
-	public void setProtId(double protId) {
+	public void setProtId(int protId) {
 		this.protId = protId;
 	}
 
-	public double getProtEnh() {
+	public int getProtEnh() {
 		return protEnh;
 	}
 
-	public void setProtEnh(double protEnh) {
+	public void setProtEnh(int protEnh) {
 		this.protEnh = protEnh;
 	}
 
-	public double getProtInh() {
+	public int getProtInh() {
 		return protInh;
 	}
 
-	public void setProtInh(double protInh) {
+	public void setProtInh(int protInh) {
 		this.protInh = protInh;
 	}
 
@@ -134,11 +134,18 @@ public class GRNGene implements Comparable<Object> {
 	}
 	
 	public static GRNGene generateRandomGene(int nProtType, int connectTo, Random rng) {
+		/*return new GRNGene(
+				Math.random()<0.5, 
+				(int)(Math.random()*GRNProtein.IDSIZE),
+				(int)(Math.random()*GRNProtein.IDSIZE),
+				(int)(Math.random()*GRNProtein.IDSIZE),
+				nProtType,
+				connectTo);*/
 		return new GRNGene(
-				rng.nextDouble()<0.5,
-				rng.nextDouble(),
-				rng.nextDouble(),
-				rng.nextDouble(),
+				rng.nextDouble()<0.5, 
+				(int)(rng.nextDouble()*GRNProtein.IDSIZE),
+				(int)(rng.nextDouble()*GRNProtein.IDSIZE),
+				(int)(rng.nextDouble()*GRNProtein.IDSIZE),
 				nProtType,
 				connectTo);
 	}

@@ -15,8 +15,8 @@ public class GRNGenome implements Comparable<Object> {
 	protected Hashtable<Long, GRNGene> allGenes;
 	protected double beta;
 	protected double delta;
-	protected double betaMax=64.0;
-	protected double betaMin=16.0;
+	protected double betaMax=2.0;
+	protected double betaMin=0.5;
 	protected double deltaMax=2.0;
 	protected double deltaMin=0.5;
 //	protected int nbEval=0;

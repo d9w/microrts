@@ -8,11 +8,12 @@ public class GRNProtein implements Serializable {
 	public static final int INPUT_PROTEIN = 0;
 	public static final int REGULATORY_PROTEIN = 2;
 	public static final int OUTPUT_PROTEIN = 1;
+	public static final int IDSIZE = 32;
 	
-	public double id;
+	public int id;
 	public double concentration;
-	public double enhancer;
-	public double inhibiter;
+	public int enhancer;
+	public int inhibiter;
 	public int type;
 	
 	public GRNProtein() {
@@ -23,7 +24,7 @@ public class GRNProtein implements Serializable {
 		type=0;
 	}
 	
-	public GRNProtein(double ID, int typ, double conc, double enh, double inh) {
+	public GRNProtein(int ID, int typ, double conc, int enh, int inh) {
 		id=ID;
 		concentration=conc;
 		enhancer=enh;
@@ -47,7 +48,7 @@ public class GRNProtein implements Serializable {
 		return concentration;
 	}
 	
-	double getID() {
+	int getID() {
 		return id;
 	}
 	
@@ -60,7 +61,8 @@ public class GRNProtein implements Serializable {
 			System.err.println("(GRNProtein.distanceTo)  g is null!!!");
 		}
 		return (protCoef*(double)(Math.abs(id-g.id))+
-            enhCoef*(double)(Math.abs(enhancer-g.enhancer))+
-            inhCoef*(double)(Math.abs(inhibiter-g.inhibiter)));
+				enhCoef*(double)(Math.abs(enhancer-g.enhancer))+
+				inhCoef*(double)(Math.abs(inhibiter-g.inhibiter)))/GRNProtein.IDSIZE;
 	}
+
 }
