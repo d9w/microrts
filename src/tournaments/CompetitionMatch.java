@@ -46,6 +46,8 @@ public class CompetitionMatch {
     public static boolean timeoutCheck = true;
     public static boolean runGC = true;
 
+    public CompetitionMatch() {}
+
     public static double runMatches(AI player0, AI player1,
                                     List<PhysicalGameState> maps,
                                     int[] gameLengths,

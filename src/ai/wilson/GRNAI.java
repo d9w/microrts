@@ -123,7 +123,7 @@ public class GRNAI extends AbstractionLayerAI {
                     makeUnits[0] = true;
                 }
             }
-            System.out.println("Unit weights: " + Arrays.toString(weightedUnitCounts));
+            // System.out.println("Unit weights: " + Arrays.toString(weightedUnitCounts));
         }
 
         boolean makeUnit = false;
@@ -227,7 +227,7 @@ public class GRNAI extends AbstractionLayerAI {
         inputs[14] = 1.0 - Math.min(1.0, selfUnits/50.0);
         inputs[15] = 1.0 - Math.min(1.0, enemyUnits/50.0);
 
-        System.out.println("inputs: " + Arrays.toString(inputs));
+        // System.out.println("inputs: " + Arrays.toString(inputs));
         double[] outputs = processGRN(inputs);
 
         boolean[] validOutputs = new boolean[outputs.length];
