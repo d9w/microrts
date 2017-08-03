@@ -42,7 +42,7 @@ public class GRNAI extends AbstractionLayerAI {
     double RESOURCE_CAP = 100.0;
 
     public GRNAI(UnitTypeTable a_utt) {
-        this(a_utt, new double[]{1.0, 1.0, 1.0, 1.0, 5.0}, new AStarPathFinding());
+        this(a_utt, new double[]{1.0, 3.0, 2.0, 0.5, 5.0}, new AStarPathFinding());
     }
 
     public GRNAI(UnitTypeTable a_utt, double[] units, PathFinding a_pf) {
@@ -142,6 +142,12 @@ public class GRNAI extends AbstractionLayerAI {
 
         System.out.println("Make units: " + Arrays.toString(makeUnits));
 
+        // heuristic for testing barracks construction
+        boolean makeBarracks = false;
+        if (barracks < 2 && selfResources > barracksType.cost) {
+            makeBarracks = true;
+        }
+
         // train units with a base or barracks and call worker and melee unit actions
         for (Unit u : pgs.getUnits()) {
             if (u.getPlayer() == player && gs.getActionAssignment(u) == null) {
@@ -158,7 +164,12 @@ public class GRNAI extends AbstractionLayerAI {
                         }
                     }
                 } else if (u.getType() == workerType) {
-                    workerBehavior(u, p, pgs);
+                    if (makeBarracks) {
+                        train(u, barracksType);
+                        makeBarracks = false;
+                    } else {
+                        workerBehavior(u, p, pgs);
+                    }
                 } else {
                     meleeUnitBehavior(u, p, pgs);
                 }
