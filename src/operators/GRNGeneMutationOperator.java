@@ -21,7 +21,7 @@ public class GRNGeneMutationOperator extends GRNMutationOperator {
 	@Override
 	public boolean mutateByModifying(GRNGenome aGenome, Random rng) {
 		Collection<GRNGene> allGenes=aGenome.getAllGenes();
-		int mutateIndex = (int)(rng.nextDouble()*allGenes.size()+2);
+		int mutateIndex = (int)(rng.nextDouble()*allGenes.size()+3);
 		for (GRNGene g : allGenes) {
 			if (mutateIndex == 0) {
 				switch ((int)(rng.nextDouble()*3)) {
@@ -49,6 +49,9 @@ public class GRNGeneMutationOperator extends GRNMutationOperator {
 			// mutate delta
 			aGenome.setDelta(rng.nextDouble()*(aGenome.getDeltaMax()-aGenome.getDeltaMin())+aGenome.getDeltaMin());
 		}
+		if (mutateIndex==2) {
+        aGenome.setWeight(rng.nextDouble()*(aGenome.getWeightsMax()-aGenome.getWeightsMin())+aGenome.getWeightsMin(), rng.nextInt(5));
+    }
 		aGenome.hasBeenModified();
 		return true;
 	}

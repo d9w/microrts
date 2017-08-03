@@ -162,7 +162,7 @@ public class CompetitionMatch {
 
         int[] gameLengths = {3000, 4000, 5000, 6000, 8000};
 
-        double score = runMatches(new GRNAI(utt),
+        double score = runMatches(new HeavyRush(utt, new BFSPathFinding()),
                                   new HeavyRush(utt, new BFSPathFinding()),
                                   maps, gameLengths, utt);
         System.out.println(score);

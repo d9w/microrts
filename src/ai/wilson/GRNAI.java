@@ -13,6 +13,8 @@ import ai.core.AI;
 import ai.core.ParameterSpecification;
 import ai.core.AIWithComputationBudget;
 import ai.core.InterruptibleAI;
+import evolver.GRNGenome;
+import grn.GRNModel;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -39,12 +41,13 @@ public class GRNAI extends AbstractionLayerAI {
     UnitType[] mobileTypes;
     double[] unitFactors;
     int resourceMax;
+    GRNModel grn;
 
     public GRNAI(UnitTypeTable a_utt) {
-        this(a_utt, new double[]{1.0, 3.0, 2.0, 0.5, 5.0}, new AStarPathFinding());
+        this(a_utt, new AStarPathFinding(), new double[5], new GRNModel());
     }
 
-    public GRNAI(UnitTypeTable a_utt, double[] units, PathFinding a_pf) {
+    public GRNAI(UnitTypeTable a_utt, PathFinding a_pf, double[] weights, GRNModel a_grn) {
         super(a_pf);
         utt = a_utt;
         resourceType = utt.getUnitType("Resource");
@@ -55,7 +58,10 @@ public class GRNAI extends AbstractionLayerAI {
         heavyType = utt.getUnitType("Heavy");
         rangedType = utt.getUnitType("Ranged");
         mobileTypes = new UnitType[]{workerType, lightType, heavyType, rangedType};
-        unitFactors = units;
+        unitFactors = weights;
+        grn = a_grn;
+        grn.reset();
+        grn.evolve(25);
     }
 
     public void reset() {
@@ -63,7 +69,7 @@ public class GRNAI extends AbstractionLayerAI {
     }
 
     public AI clone() {
-        return new GRNAI(utt);
+        return new GRNAI(utt, new AStarPathFinding(), unitFactors, grn.copy());
     }
 
     public PlayerAction getAction(int player, GameState gs) {
@@ -160,9 +166,14 @@ public class GRNAI extends AbstractionLayerAI {
 
     // GRN goes here
     public double[] processGRN(double[] inputs) {
+
+        for(int i=0; i<inputs.length; i++) {
+            grn.proteins.get(i).concentration = inputs[i];
+        }
+
         double[] outputs = new double[9];
         for (int i=0; i<outputs.length; i++) {
-            outputs[i] = r.nextDouble();
+            outputs[i] = grn.proteins.get(i+inputs.length).concentration;
         }
         return outputs;
     }

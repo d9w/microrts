@@ -130,6 +130,9 @@ public class Evolver {
 			}
 			g.beta=rng.nextDouble()*(g.betaMax-g.betaMin)+g.betaMin;
 			g.delta=rng.nextDouble()*(g.deltaMax-g.deltaMin)+g.deltaMin;
+      for (int i=0; i<g.weights.length; i++) {
+          g.weights[i] = rng.nextDouble()*(g.weightsMax-g.weightsMin)+g.weightsMin;
+      }
 			offsprings.add(g);
 			for (int i=0; i<duplicateInit; i++) {
 				GRNGenome mutG=new GRNGeneMutationOperator().cloneAndMutate(g, rng);
