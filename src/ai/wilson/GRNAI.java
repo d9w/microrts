@@ -39,7 +39,6 @@ public class GRNAI extends AbstractionLayerAI {
     UnitType[] mobileTypes;
     double[] unitFactors;
     int resourceMax;
-    double RESOURCE_CAP = 100.0;
 
     public GRNAI(UnitTypeTable a_utt) {
         this(a_utt, new double[]{1.0, 3.0, 2.0, 0.5, 5.0}, new AStarPathFinding());
@@ -73,14 +72,12 @@ public class GRNAI extends AbstractionLayerAI {
         Player p2 = gs.getPlayer(1-player);
 
         // get global inputs
-        double selfResources = p.getResources();
-        double enemyResources = p2.getResources();
-        double selfUnits = 0.0;
-        double enemyUnits = 0.0;
+        int selfResources = p.getResources();
+        int enemyResources = p2.getResources();
+        int selfUnits = 0;
+        int enemyUnits = 0;
         int barracks = 0;
         int bases = 0;
-
-        System.out.println("Resources: " + selfResources + " " + enemyResources);
 
         int[] unitCounts = {0, 0, 0, 0};
         for (Unit u : pgs.getUnits()) {
@@ -91,87 +88,69 @@ public class GRNAI extends AbstractionLayerAI {
                 else if (u.getType() == lightType) unitCounts[1]++;
                 else if (u.getType() == heavyType) unitCounts[2]++;
                 else if (u.getType() == rangedType) unitCounts[3]++;
-                selfUnits += 1.0;
+                selfUnits += 1;
             } else if (u.getPlayer() == p2.getID()) {
-                enemyUnits += 1.0;
+                enemyUnits += 1;
             }
         }
 
         // decide which units to make
-        boolean[] makeUnits = {false, false, false, false};
+        boolean[] makeUnits = new boolean[4];
         if (bases > 0) {
+            double[] weightedUnitCounts = {0.0, 0.0, 0.0, 0.0, 0.0};
+            for (int i=0; i<4; i++) {
+                weightedUnitCounts[i] = (double)unitCounts[i]*unitFactors[i];
+            }
+            weightedUnitCounts[4] = unitFactors[4] * selfResources; // idle action
+
             if (barracks > 0) {
-                System.out.println("Unit counts: " + Arrays.toString(unitCounts));
-
-                double[] weightedUnitCounts = {0.0, 0.0, 0.0, 0.0, 0.0};
-
-                for (int i=0; i<4; i++) {
-                    weightedUnitCounts[i] = (double)unitCounts[i]*unitFactors[i];
-                }
-
-                weightedUnitCounts[4] = unitFactors[4]; // idle action
-
                 int minType = -1;
                 double minCount = weightedUnitCounts[0];
-                for (int i=0; i<4; i++) {
+                for (int i=0; i<weightedUnitCounts.length; i++) {
                     if (weightedUnitCounts[i] < minCount) {
                         minType = i;
                         minCount = weightedUnitCounts[i];
                     }
                 }
 
-                System.out.println("Weighted unit counts: " + Arrays.toString(weightedUnitCounts));
-
                 if (minType == -1) {
-                    if (selfResources >= workerType.cost) {
-                        makeUnits[0] = true;
-                    }
-                } else if (minType < 4) {
-                    if (selfResources >= mobileTypes[minType].cost) {
-                        makeUnits[minType] = true;
-                    }
+                    makeUnits[0] = true;
+                } else if (minType != 4) {
+                    makeUnits[minType] = true;
                 }
             } else {
-                // if (unitCounts[0] * unitFactors[0] < unitFactors[4]) {
-                if (selfResources >= workerType.cost) {
+                if (weightedUnitCounts[0] < weightedUnitCounts[4]) {
                     makeUnits[0] = true;
                 }
-                // }
             }
+            System.out.println("Unit weights: " + Arrays.toString(weightedUnitCounts));
         }
 
-        System.out.println("Make units: " + Arrays.toString(makeUnits));
-
-        // heuristic for testing barracks construction
-        boolean makeBarracks = false;
-        if (barracks < 2 && selfResources > barracksType.cost) {
-            makeBarracks = true;
+        boolean makeUnit = false;
+        for (int i=0; i<makeUnits.length; i++) {
+            if (makeUnits[i]) makeUnit = true;
         }
 
         // train units with a base or barracks and call worker and melee unit actions
         for (Unit u : pgs.getUnits()) {
             if (u.getPlayer() == player && gs.getActionAssignment(u) == null) {
                 if (u.getType() == baseType) {
-                    if (makeUnits[0]) {
+                    if (makeUnit && makeUnits[0] && selfResources >= workerType.cost) {
                         train(u, workerType);
-                        makeUnits[0] = false;
+                        makeUnit = false;
                     }
                 } else if (u.getType() == barracksType) {
-                    for (int i=1; i<4; i++) {
-                        if (makeUnits[i]) {
-                            train(u, mobileTypes[i]);
-                            makeUnits[i] = false;
+                    if (makeUnit) {
+                        for (int i=1; i<makeUnits.length; i++) {
+                            if (makeUnits[i]) {
+                                train(u, mobileTypes[i]);
+                                makeUnit = false;
+                            }
                         }
                     }
-                } else if (u.getType() == workerType) {
-                    if (makeBarracks) {
-                        train(u, barracksType);
-                        makeBarracks = false;
-                    } else {
-                        workerBehavior(u, p, pgs);
-                    }
                 } else {
-                    meleeUnitBehavior(u, p, pgs);
+                    meleeUnitBehavior(u, p, pgs, selfResources, enemyResources,
+                                      selfUnits, enemyUnits);
                 }
             }
         }
@@ -179,70 +158,113 @@ public class GRNAI extends AbstractionLayerAI {
         return translateActions(player, gs);
     }
 
-    public void meleeUnitBehavior(Unit u, Player p, PhysicalGameState pgs) {
-        Unit closestEnemy = null;
-        int closestDistance = 0;
-        for (Unit u2 : pgs.getUnits()) {
-            if (u2.getPlayer() >= 0 && u2.getPlayer() != p.getID()) {
-                int d = Math.abs(u2.getX() - u.getX()) + Math.abs(u2.getY() - u.getY());
-                if (closestEnemy == null || d < closestDistance) {
-                    closestEnemy = u2;
-                    closestDistance = d;
-                }
-            }
+    // GRN goes here
+    public double[] processGRN(double[] inputs) {
+        double[] outputs = new double[9];
+        for (int i=0; i<outputs.length; i++) {
+            outputs[i] = r.nextDouble();
         }
-        if (closestEnemy != null) {
-            attack(u, closestEnemy);
-        }
+        return outputs;
     }
 
-    public void workerBehavior(Unit u, Player p, PhysicalGameState pgs) {
-        Unit closestBase = null;
-        Unit closestResource = null;
-        int closestDistance = 0;
+    public void meleeUnitBehavior(Unit u, Player p, PhysicalGameState pgs,
+                                  int selfResources, int enemyResources,
+                                  int selfUnits, int enemyUnits) {
+
+        // collect distance inputs
+        int maxDist = pgs.getWidth() + pgs.getHeight();
+        Unit closestResource = null; int closestResourceDist = maxDist;
+        Unit selfUnit = null; int selfUnitDist = maxDist;
+        Unit selfBase = null; int selfBaseDist = maxDist;
+        Unit selfBarracks = null; int selfBarracksDist = maxDist;
+        Unit enemyUnit = null; int enemyUnitDist = maxDist;
+        Unit enemyBase = null; int enemyBaseDist = maxDist;
+        Unit enemyBarracks = null; int enemyBarracksDist = maxDist;
+
         for (Unit u2 : pgs.getUnits()) {
+            if (u2 == u) {
+                continue;
+            }
+            int d = Math.abs(u2.getX() - u.getX()) + Math.abs(u2.getY() - u.getY());
             if (u2.getType().isResource) {
-                int d = Math.abs(u2.getX() - u.getX()) + Math.abs(u2.getY() - u.getY());
-                if (closestResource == null || d < closestDistance) {
-                    closestResource = u2;
-                    closestDistance = d;
-                }
-            }
-        }
-        closestDistance = 0;
-        for (Unit u2 : pgs.getUnits()) {
-            if (u2.getType().isStockpile && u2.getPlayer()==p.getID()) {
-                int d = Math.abs(u2.getX() - u.getX()) + Math.abs(u2.getY() - u.getY());
-                if (closestBase == null || d < closestDistance) {
-                    closestBase = u2;
-                    closestDistance = d;
-                }
-            }
-        }
-        Unit closestEnemy = null;
-        int enemyDistance = 0;
-        for (Unit u2 : pgs.getUnits()) {
-            if (u2.getPlayer() >= 0 && u2.getPlayer() != p.getID()) {
-                int d = Math.abs(u2.getX() - u.getX()) + Math.abs(u2.getY() - u.getY());
-                if (closestEnemy == null || d < enemyDistance) {
-                    closestEnemy = u2;
-                    enemyDistance = d;
-                }
-            }
-        }
-        if (closestResource != null && closestBase != null) {
-            if (closestEnemy != null) {
-                if (closestDistance < enemyDistance) {
-                    harvest(u, closestResource, closestBase);
+                if (d < closestResourceDist) closestResource = u2; closestResourceDist = d;
+            } else if (u2.getType() == baseType) {
+                if (u2.getPlayer() == p.getID()) {
+                    if (d < selfBaseDist) selfBase = u2; selfBaseDist = d;
                 } else {
-                    attack(u, closestEnemy);
+                    if (d < enemyBaseDist) enemyBase = u2; enemyBaseDist = d;
+                }
+            } else if (u2.getType() == barracksType) {
+                if (u2.getPlayer() == p.getID()) {
+                    if (d < selfBarracksDist) selfBarracks = u2; selfBarracksDist = d;
+                } else {
+                    if (d < enemyBarracksDist) enemyBarracks = u2; enemyBarracksDist = d;
                 }
             } else {
-                harvest(u, closestResource, closestBase);
+                if (u2.getPlayer() == p.getID()) {
+                    if (d < selfUnitDist) selfUnit = u2; selfUnitDist = d;
+                } else {
+                    if (d < enemyUnitDist) enemyUnit = u2; enemyUnitDist = d;
+                }
             }
-        } else if (closestEnemy != null) {
-            attack(u, closestEnemy);
         }
+
+        int[] distances = {closestResourceDist, selfUnitDist, selfBaseDist,
+                           selfBarracksDist, enemyUnitDist, enemyBaseDist,
+                           enemyBarracksDist};
+
+        double[] inputs = new double[16];
+        for (int i=0; i<distances.length; i++) {
+            inputs[i] = 1.0 - (distances[i]/(double)maxDist);
+        }
+        inputs[7] = 1.0 - (u.getHitPoints()/(double)u.getMaxHitPoints());
+        if (u.getType() == workerType) inputs[8] = 1.0;
+        else if (u.getType() == lightType) inputs[9] = 1.0;
+        else if (u.getType() == heavyType) inputs[10] = 1.0;
+        else if (u.getType() == rangedType) inputs[11] = 1.0;
+        inputs[12] = 1.0 - Math.min(1.0, selfResources/50.0);
+        inputs[13] = 1.0 - Math.min(1.0, enemyResources/50.0);
+        inputs[14] = 1.0 - Math.min(1.0, selfUnits/50.0);
+        inputs[15] = 1.0 - Math.min(1.0, enemyUnits/50.0);
+
+        System.out.println("inputs: " + Arrays.toString(inputs));
+        double[] outputs = processGRN(inputs);
+
+        boolean[] validOutputs = new boolean[outputs.length];
+        for (int i=0; i<outputs.length; i++) validOutputs[i] = true;
+        if (closestResource == null) validOutputs[0] = false;
+        if (selfBase == null) {
+            validOutputs[1] = false;
+            if (u.getType() == workerType) validOutputs[0] = false;
+        }
+        if (selfBarracks == null) validOutputs[2] = false;
+        if (enemyUnit == null) validOutputs[3] = false;
+        if (enemyBase == null) validOutputs[4] = false;
+        if (enemyBarracks == null) validOutputs[5] = false;
+        if (u.getType() == workerType) validOutputs[7] = false; validOutputs[8] = false;
+
+        int maxact = -1;
+        double maxout = 0.0;
+        for (int i=0; i<outputs.length; i++) {
+            if (validOutputs[i] && outputs[i] >= maxout) {
+                maxout = outputs[i];
+                maxact = i;
+            }
+        }
+
+        if (maxact == 0) {
+            if (u.getType() == workerType) {
+                    harvest(u, closestResource, selfBase);
+            } else {
+                move(u, closestResource.getX(), closestResource.getY());
+            }
+        } else if (maxact == 1) move(u, selfBase.getX(), selfBase.getY());
+        else if (maxact == 2) move(u, selfBarracks.getX(), selfBarracks.getY());
+        else if (maxact == 3) attack(u, enemyUnit);
+        else if (maxact == 4) attack(u, enemyBase);
+        else if (maxact == 5) attack(u, enemyBarracks);
+        else if (maxact == 7) train(u, baseType);
+        else if (maxact == 8) train(u, barracksType);
     }
 
     @Override
