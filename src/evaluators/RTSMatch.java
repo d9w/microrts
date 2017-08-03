@@ -1,6 +1,6 @@
 package evaluators;
 
-import ai.abstraction.HeavyRush;
+import ai.abstraction.WorkerRush;
 import ai.abstraction.pathfinding.AStarPathFinding;
 import ai.abstraction.pathfinding.BFSPathFinding;
 import ai.abstraction.pathfinding.PathFinding;
@@ -38,7 +38,7 @@ public class RTSMatch extends GRNGenomeEvaluator {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        gameLengths = new int[]{300, 4000, 5000, 6000, 8000};
+        gameLengths = new int[]{3000, 4000, 5000, 6000, 8000};
         c = new CompetitionMatch();
         c.visualize = false;
     }
@@ -47,13 +47,13 @@ public class RTSMatch extends GRNGenomeEvaluator {
     public double evaluate(GRNGenome aGenome) {
         double fitness = 0.0;
         GRNModel grn = buildGRNFromGenome(aGenome);
-        System.out.println("Unit weights: " + Arrays.toString(aGenome.getWeights()));
+        System.out.println("DEBUG Unit weights: " + Arrays.toString(aGenome.getWeights()));
         try {
             fitness = CompetitionMatch.runMatches(new GRNAI(utt, new AStarPathFinding(),
                                                             aGenome.getWeights(), grn),
                                                   new WorkerRush(utt, new BFSPathFinding()),
                                                   maps, gameLengths, utt);
-            System.out.println(fitness);
+            System.out.println("DEBUG " + fitness);
         } catch (Exception e) {
             e.printStackTrace();
         }

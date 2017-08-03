@@ -138,7 +138,7 @@ public class CompetitionMatch {
 
                 if (w!=null) w.dispose();
                 int winner = gs.winner();
-                System.out.println(map_idx + " " + ai1 + " " + ai2 + " " + winner);
+                System.out.println("DEBUG " + map_idx + " " + ai1 + " " + ai2 + " " + winner);
                 if (winner == -1) {
                     if (crashed != side && timedout != side) score += 0.5;
                 } else if (winner == side) {
