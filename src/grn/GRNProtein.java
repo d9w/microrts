@@ -8,7 +8,7 @@ public class GRNProtein implements Serializable {
 	public static final int INPUT_PROTEIN = 0;
 	public static final int REGULATORY_PROTEIN = 2;
 	public static final int OUTPUT_PROTEIN = 1;
-	public static final int IDSIZE = 32;
+	public static final int IDSIZE = 64;
 	
 	public int id;
 	public double concentration;

@@ -26,6 +26,7 @@ public class RTSMatch extends GRNGenomeEvaluator {
     List<PhysicalGameState> maps;
     UnitTypeTable utt;
     int[] gameLengths;
+    int[] sides;
     CompetitionMatch c;
     GRNModel best;
     double bestfit = 0.0;
@@ -47,6 +48,7 @@ public class RTSMatch extends GRNGenomeEvaluator {
             e.printStackTrace();
         }
         gameLengths = new int[]{3000, 4000, 6000};
+        sides = new int[]{0, 1, 0};
         c = new CompetitionMatch();
         c.visualize = false;
     }
@@ -69,7 +71,7 @@ public class RTSMatch extends GRNGenomeEvaluator {
             opp = new GRNAI(utt, new AStarPathFinding(), best);
         }
         try {
-            fitness = CompetitionMatch.runMatches(player, opp, maps, gameLengths, utt);
+            fitness = CompetitionMatch.runMatches(player, opp, maps, gameLengths, sides,utt);
             // fitness = r.nextDouble();
         } catch (Exception e) {
             e.printStackTrace();

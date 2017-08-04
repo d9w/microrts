@@ -49,7 +49,11 @@ public class GRNGeneMutationOperator extends GRNMutationOperator {
 			// mutate delta
 			aGenome.setDelta(rng.nextDouble()*(aGenome.getDeltaMax()-aGenome.getDeltaMin())+aGenome.getDeltaMin());
 		}
-    aGenome.setWeight(rng.nextDouble()*(aGenome.getWeightsMax()-aGenome.getWeightsMin())+aGenome.getWeightsMin(), rng.nextInt(5));
+    for (int i=0; i<5; i++) {
+        if (rng.nextDouble() > 0.5) {
+            aGenome.setWeight(rng.nextDouble()*(aGenome.getWeightsMax()-aGenome.getWeightsMin())+aGenome.getWeightsMin(), i);
+        }
+    }
 		aGenome.hasBeenModified();
 		return true;
 	}

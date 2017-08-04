@@ -150,7 +150,10 @@ public class GRNGenome implements Comparable<Object> {
 			// take beta and delta to the distance calculation
 			distance+=Math.abs(beta-g.beta)/(betaMax-betaMin);
 			distance+=Math.abs(delta-g.delta)/(deltaMax-deltaMin);
-			return ((double)distance)/(gl.size()+2.0);
+      for (int i=0; i<5; i++) {
+          distance += Math.abs(weights[i]-g.weights[i])/(weightsMax-weightsMin);
+      }
+			return ((double)distance)/(gl.size()+7.0);
 		} else {
 			return ((double)distance)/gl.size();
 		}
