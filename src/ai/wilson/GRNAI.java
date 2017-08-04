@@ -44,10 +44,10 @@ public class GRNAI extends AbstractionLayerAI {
     GRNModel grn;
 
     public GRNAI(UnitTypeTable a_utt) {
-        this(a_utt, new AStarPathFinding(), new double[5], new GRNModel());
+        this(a_utt, new AStarPathFinding(), new GRNModel());
     }
 
-    public GRNAI(UnitTypeTable a_utt, PathFinding a_pf, double[] weights, GRNModel a_grn) {
+    public GRNAI(UnitTypeTable a_utt, PathFinding a_pf, GRNModel a_grn) {
         super(a_pf);
         utt = a_utt;
         resourceType = utt.getUnitType("Resource");
@@ -58,7 +58,7 @@ public class GRNAI extends AbstractionLayerAI {
         heavyType = utt.getUnitType("Heavy");
         rangedType = utt.getUnitType("Ranged");
         mobileTypes = new UnitType[]{workerType, lightType, heavyType, rangedType};
-        unitFactors = weights;
+        unitFactors = a_grn.weights;
         grn = a_grn;
         grn.reset();
         grn.evolve(25);
@@ -69,7 +69,7 @@ public class GRNAI extends AbstractionLayerAI {
     }
 
     public AI clone() {
-        return new GRNAI(utt, new AStarPathFinding(), unitFactors, grn.copy());
+        return new GRNAI(utt, new AStarPathFinding(), grn.copy());
     }
 
     public PlayerAction getAction(int player, GameState gs) {

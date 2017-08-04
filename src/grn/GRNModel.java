@@ -19,13 +19,15 @@ public class GRNModel implements Serializable {
 	double maxInhibit;
 	double enhanceMatching[][];
 	double inhibitMatching[][];
+  public double[] weights;
 
 	public Vector<GRNProtein> proteins;
 
-	public GRNModel(Vector<GRNProtein> p, double b, double d) {
+  public GRNModel(Vector<GRNProtein> p, double b, double d, double[] w) {
 		proteins=p;
 		beta=b;
 		delta=d;
+    weights=w;
 
 		maxEnhance=0;
 		maxInhibit=0;
@@ -37,6 +39,7 @@ public class GRNModel implements Serializable {
 		proteins=new Vector<GRNProtein>();
 		beta=1;
 		delta=1;
+    weights=new double[5];
 	}
 
 	public GRNModel(GRNModel grn) {
@@ -47,6 +50,7 @@ public class GRNModel implements Serializable {
 
 		beta=grn.beta;
 		delta=grn.delta;
+    weights=grn.weights;
 
 		maxEnhance=grn.maxEnhance;
 		maxInhibit=grn.maxInhibit;
@@ -209,6 +213,7 @@ public class GRNModel implements Serializable {
 
 		grn.beta=this.beta;
 		grn.delta=this.delta;
+    grn.weights=this.weights;
 
 		grn.maxEnhance=this.maxEnhance;
 		grn.maxInhibit=this.maxInhibit;

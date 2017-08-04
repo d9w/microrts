@@ -1,9 +1,14 @@
 package evaluators;
 
+import ai.*;
+import ai.core.AI;
+import ai.abstraction.LightRush;
 import ai.abstraction.WorkerRush;
 import ai.abstraction.pathfinding.AStarPathFinding;
 import ai.abstraction.pathfinding.BFSPathFinding;
 import ai.abstraction.pathfinding.PathFinding;
+import ai.evaluation.SimpleSqrtEvaluationFunction3;
+import ai.mcts.naivemcts.NaiveMCTS;
 import ai.wilson.GRNAI;
 import evolver.GRNGenome;
 import grn.GRNModel;
@@ -22,6 +27,9 @@ public class RTSMatch extends GRNGenomeEvaluator {
     UnitTypeTable utt;
     int[] gameLengths;
     CompetitionMatch c;
+    GRNModel best;
+    double bestfit = 0.0;
+    int opponent = 0;
 
     public RTSMatch() {
         name = "RTSMatch";
@@ -47,15 +55,41 @@ public class RTSMatch extends GRNGenomeEvaluator {
     public double evaluate(GRNGenome aGenome) {
         double fitness = 0.0;
         GRNModel grn = buildGRNFromGenome(aGenome);
-        System.out.println("DEBUG Unit weights: " + Arrays.toString(aGenome.getWeights()));
+        AI player = new GRNAI(utt, new AStarPathFinding(), grn);
+        AI opp = new RandomAI();
+        if (opponent == 1) {
+            opp = new RandomBiasedAI();
+        } else if (opponent == 2) {
+            opp = new LightRush(utt, new BFSPathFinding());
+        } else if (opponent == 3) {
+            opp = new WorkerRush(utt, new BFSPathFinding());
+        } else if (opponent == 4) {
+            opp = new NaiveMCTS(100, -1, 100, 1, 1.00f, 0.0f, 0.25f, new RandomBiasedAI(), new SimpleSqrtEvaluationFunction3(), true);
+        } else if (opponent > 4) {
+            opp = new GRNAI(utt, new AStarPathFinding(), best);
+        }
         try {
-            fitness = CompetitionMatch.runMatches(new GRNAI(utt, new AStarPathFinding(),
-                                                            aGenome.getWeights(), grn),
-                                                  new WorkerRush(utt, new BFSPathFinding()),
-                                                  maps, gameLengths, utt);
-            System.out.println("DEBUG " + fitness);
+            fitness = CompetitionMatch.runMatches(player, opp, maps, gameLengths, utt);
+            // fitness = r.nextDouble();
         } catch (Exception e) {
             e.printStackTrace();
+        }
+        System.out.println("eval " + opponent + " " + Arrays.toString(grn.weights)
+                           + " " + grn.size() + " " + fitness);
+        if (opponent < 4) {
+            if (fitness > 0.75) {
+                opponent += 1;
+            }
+        } else if (opponent == 4) {
+            if (fitness > 0.75) {
+                opponent += 1;
+                best = grn.copy();
+            }
+        } else {
+            if (fitness > bestfit) {
+                bestfit = fitness;
+                best = grn.copy();
+            }
         }
         aGenome.setNewFitness(fitness);
         GRNGenomeEvaluator.numEvaluations++;

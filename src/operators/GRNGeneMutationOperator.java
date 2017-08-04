@@ -50,7 +50,9 @@ public class GRNGeneMutationOperator extends GRNMutationOperator {
 			aGenome.setDelta(rng.nextDouble()*(aGenome.getDeltaMax()-aGenome.getDeltaMin())+aGenome.getDeltaMin());
 		}
 		if (mutateIndex==2) {
-        aGenome.setWeight(rng.nextDouble()*(aGenome.getWeightsMax()-aGenome.getWeightsMin())+aGenome.getWeightsMin(), rng.nextInt(5));
+        for (int i=0; i<5; i++) {
+            aGenome.setWeight(rng.nextDouble()*(aGenome.getWeightsMax()-aGenome.getWeightsMin())+aGenome.getWeightsMin(), i);
+        }
     }
 		aGenome.hasBeenModified();
 		return true;
