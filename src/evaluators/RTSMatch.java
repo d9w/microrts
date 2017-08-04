@@ -31,6 +31,7 @@ public class RTSMatch extends GRNGenomeEvaluator {
     GRNModel best;
     double bestfit = 0.0;
     int opponent = 0;
+    int switchOpp = 10000;
 
     public RTSMatch() {
         name = "RTSMatch";
@@ -57,6 +58,10 @@ public class RTSMatch extends GRNGenomeEvaluator {
     public double evaluate(GRNGenome aGenome) {
         double fitness = 0.0;
         GRNModel grn = buildGRNFromGenome(aGenome);
+        if (switchOpp == generation) {
+            opponent += 1;
+            switchOpp = 0;
+        }
         AI player = new GRNAI(utt, new AStarPathFinding(), grn);
         AI opp = new RandomAI();
         if (opponent == 1) {
@@ -79,13 +84,9 @@ public class RTSMatch extends GRNGenomeEvaluator {
         System.out.println("eval " + opponent + " " + Arrays.toString(grn.weights)
                            + " " + grn.size() + " " + fitness);
         if (opponent < 4) {
-            if (fitness > 0.75) {
-                opponent += 1;
-            }
-        } else if (opponent == 4) {
-            if (fitness > 0.75) {
-                opponent += 1;
-                best = grn.copy();
+            if (fitness >= 0.8) {
+                switchOpp = generation+1;
+                best = grn.copy()
             }
         } else {
             if (fitness > bestfit) {
