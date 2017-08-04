@@ -24,6 +24,7 @@ public class RTSMatch extends GRNGenomeEvaluator {
 
     Random r;
     List<PhysicalGameState> maps;
+    List<PhysicalGameState> maps2;
     UnitTypeTable utt;
     int[] gameLengths;
     int[] sides;
@@ -35,23 +36,23 @@ public class RTSMatch extends GRNGenomeEvaluator {
 
     public RTSMatch() {
         name = "RTSMatch";
-        numGRNInputs = 16;
-        numGRNOutputs = 9;
+        numGRNInputs = 14;
+        numGRNOutputs = 7;
         r = new Random();
         utt = new UnitTypeTable();
         maps = new LinkedList<PhysicalGameState>();
+        maps2 = new LinkedList<PhysicalGameState>();
         try {
             maps.add(PhysicalGameState.load("maps/8x8/basesWorkers8x8A.xml",utt));
-            maps.add(PhysicalGameState.load("maps/16x16/basesWorkers16x16A.xml",utt));
             maps.add(PhysicalGameState.load("maps/BWDistantResources32x32.xml",utt));
-            // maps.add(PhysicalGameState.load("maps/BroodWar/(4)BloodBath.scmB.xml",utt));
+            maps2.add(PhysicalGameState.load("maps/16x16/basesWorkers16x16A.xml",utt));
         } catch (Exception e) {
             e.printStackTrace();
         }
-        gameLengths = new int[]{3000, 3000, 3000};
+        gameLengths = new int[]{3000, 6000};
         sides = new int[]{0, 1, 0};
         c = new CompetitionMatch();
-        c.visualize = false;
+        c.visualize = true;
     }
 
     @Override
@@ -64,19 +65,26 @@ public class RTSMatch extends GRNGenomeEvaluator {
         }
         AI player = new GRNAI(utt, new AStarPathFinding(), grn);
         AI opp = new RandomAI();
+        AI opp2 = new RandomAI();
         if (opponent == 1) {
-            opp = new RandomBiasedAI();
+            opp2 = new RandomBiasedAI();
         } else if (opponent == 2) {
-            opp = new LightRush(utt, new BFSPathFinding());
+            opp = new RandomBiasedAI();
+            opp2 = new LightRush(utt, new BFSPathFinding());
         } else if (opponent == 3) {
-            opp = new WorkerRush(utt, new BFSPathFinding());
+            opp = new LightRush(utt, new BFSPathFinding());
+            opp2 = new WorkerRush(utt, new BFSPathFinding());
         } else if (opponent == 4) {
-            opp = new NaiveMCTS(100, -1, 100, 1, 1.00f, 0.0f, 0.25f, new RandomBiasedAI(), new SimpleSqrtEvaluationFunction3(), true);
+            opp = new WorkerRush(utt, new BFSPathFinding());
+            opp2 = new NaiveMCTS(100, -1, 100, 1, 1.00f, 0.0f, 0.25f, new RandomBiasedAI(), new SimpleSqrtEvaluationFunction3(), true);
         } else if (opponent > 4) {
-            opp = new GRNAI(utt, new AStarPathFinding(), best);
+            opp = new WorkerRush(utt, new BFSPathFinding());
+            opp2 = new GRNAI(utt, new AStarPathFinding(), best);
         }
         try {
-            fitness = c.runMatches(player, opp, maps, gameLengths, sides,utt);
+            fitness = c.runMatches(player, opp, maps, gameLengths, sides, utt);
+            fitness+= c.runMatches(player, opp2, maps2, new int[]{4000}, new int[]{0}, utt);
+            fitness /= 2.0;
             // fitness = r.nextDouble();
         } catch (Exception e) {
             e.printStackTrace();
@@ -86,7 +94,7 @@ public class RTSMatch extends GRNGenomeEvaluator {
         if (opponent < 4) {
             if (fitness >= 0.8) {
                 switchOpp = generation+1;
-                best = grn.copy()
+                best = grn.copy();
             }
         } else {
             if (fitness > bestfit) {
