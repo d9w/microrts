@@ -13,6 +13,7 @@ import ai.core.AI;
 import ai.core.ParameterSpecification;
 import ai.core.AIWithComputationBudget;
 import ai.core.InterruptibleAI;
+import ai.wilson.MoveAdjacent;
 import evolver.GRNGenome;
 import grn.GRNModel;
 import java.util.Arrays;
@@ -78,8 +79,6 @@ public class GRNAI extends AbstractionLayerAI {
         Player p2 = gs.getPlayer(1-player);
 
         // get global inputs
-        int selfResources = p.getResources();
-        int enemyResources = p2.getResources();
         int selfUnits = 0;
         int enemyUnits = 0;
         int barracks = 0;
@@ -125,7 +124,7 @@ public class GRNAI extends AbstractionLayerAI {
                     makeUnits[minType] = true;
                 }
             } else {
-                if (weightedUnitCounts[0] < weightedUnitCounts[4]) {
+                if (weightedUnitCounts[0] < weightedUnitCounts[4] || p.getResources() > 10) {
                     makeUnits[0] = true;
                 }
             }
@@ -140,7 +139,7 @@ public class GRNAI extends AbstractionLayerAI {
         for (Unit u : pgs.getUnits()) {
             if (u.getPlayer() == player && gs.getActionAssignment(u) == null) {
                 if (u.getType() == baseType) {
-                    if (makeUnit && makeUnits[0] && selfResources >= workerType.cost) {
+                    if (makeUnit && makeUnits[0] && p.getResources() >= workerType.cost) {
                         train(u, workerType);
                         makeUnit = false;
                     }
@@ -154,8 +153,7 @@ public class GRNAI extends AbstractionLayerAI {
                         }
                     }
                 } else {
-                    meleeUnitBehavior(u, p, pgs, selfResources, enemyResources,
-                                      selfUnits, enemyUnits);
+                    meleeUnitBehavior(u, p, p2, pgs, selfUnits, enemyUnits);
                 }
             }
         }
@@ -168,16 +166,15 @@ public class GRNAI extends AbstractionLayerAI {
         for(int i=0; i<inputs.length; i++) {
             grn.proteins.get(i).concentration = inputs[i];
         }
-        grn.evolve(1);
-        double[] outputs = new double[7];
+        grn.evolve(5);
+        double[] outputs = new double[6];
         for (int i=0; i<outputs.length; i++) {
             outputs[i] = grn.proteins.get(i+inputs.length).concentration;
         }
         return outputs;
     }
 
-    public void meleeUnitBehavior(Unit u, Player p, PhysicalGameState pgs,
-                                  int selfResources, int enemyResources,
+    public void meleeUnitBehavior(Unit u, Player p, Player p2, PhysicalGameState pgs,
                                   int selfUnits, int enemyUnits) {
 
         // collect distance inputs
@@ -196,24 +193,45 @@ public class GRNAI extends AbstractionLayerAI {
             }
             int d = Math.abs(u2.getX() - u.getX()) + Math.abs(u2.getY() - u.getY());
             if (u2.getType().isResource) {
-                if (d < closestResourceDist) closestResource = u2; closestResourceDist = d;
+                if (d < closestResourceDist) {
+                    closestResource = u2;
+                    closestResourceDist = d;
+                }
             } else if (u2.getType() == baseType) {
                 if (u2.getPlayer() == p.getID()) {
-                    if (d < selfBaseDist) selfBase = u2; selfBaseDist = d;
+                    if (d < selfBaseDist) {
+                        selfBase = u2;
+                        selfBaseDist = d;
+                    }
                 } else {
-                    if (d < enemyBuildingDist) enemyBuilding = u2; enemyBuildingDist = d;
+                    if (d < enemyBuildingDist) {
+                        enemyBuilding = u2;
+                        enemyBuildingDist = d;
+                    }
                 }
             } else if (u2.getType() == barracksType) {
                 if (u2.getPlayer() == p.getID()) {
-                    if (d < selfBarracksDist) selfBarracks = u2; selfBarracksDist = d;
+                    if (d < selfBarracksDist) {
+                        selfBarracks = u2;
+                        selfBarracksDist = d;
+                    }
                 } else {
-                    if (d < enemyBuildingDist) enemyBuilding = u2; enemyBuildingDist = d;
+                    if (d < enemyBuildingDist) {
+                        enemyBuilding = u2;
+                        enemyBuildingDist = d;
+                    }
                 }
             } else {
                 if (u2.getPlayer() == p.getID()) {
-                    if (d < selfUnitDist) selfUnit = u2; selfUnitDist = d;
+                    if (d < selfUnitDist) {
+                        selfUnit = u2;
+                        selfUnitDist = d;
+                    }
                 } else {
-                    if (d < enemyUnitDist) enemyUnit = u2; enemyUnitDist = d;
+                    if (d < enemyUnitDist) {
+                        enemyUnit = u2;
+                        enemyUnitDist = d;
+                    }
                 }
             }
         }
@@ -238,8 +256,8 @@ public class GRNAI extends AbstractionLayerAI {
         else if (u.getType() == lightType) inputs[7] = 1.0;
         else if (u.getType() == heavyType) inputs[8] = 1.0;
         else if (u.getType() == rangedType) inputs[9] = 1.0;
-        inputs[10] = 1.0 - Math.min(1.0, selfResources/30.0);
-        inputs[11] = 1.0 - Math.min(1.0, enemyResources/30.0);
+        inputs[10] = 1.0 - Math.min(1.0, p.getResources()/30.0);
+        inputs[11] = 1.0 - Math.min(1.0, p2.getResources()/30.0);
         inputs[12] = 1.0 - Math.min(1.0, selfUnits/30.0);
         inputs[13] = 1.0 - Math.min(1.0, enemyUnits/30.0);
 
@@ -252,9 +270,17 @@ public class GRNAI extends AbstractionLayerAI {
         if (selfBuilding == null) validOutputs[1] = false;
         if (enemyUnit == null) validOutputs[2] = false;
         if (enemyBuilding == null) validOutputs[3] = false;
-        if (u.getType() != workerType) {
-            validOutputs[5] = false; validOutputs[6] = false;
+        if (u.getType() == workerType) {
+            if (selfBase == null) {
+                validOutputs[0] = false;
+                validOutputs[1] = false;
+            }
+        } else {
+            validOutputs[4] = false;
+            validOutputs[5] = false;
         }
+        if (p.getResources() < baseType.cost) validOutputs[4] = false;
+        if (p.getResources() < barracksType.cost) validOutputs[5] = false;
 
         int maxact = -1;
         double maxout = 0.0;
@@ -264,19 +290,25 @@ public class GRNAI extends AbstractionLayerAI {
                 maxact = i;
             }
         }
-        if (u.getResources()>0 && selfBase != null) maxact = 0;
 
+        // take action
         if (maxact == 0) {
             if (u.getType() == workerType) {
-                    harvest(u, closestResource, selfBase);
+                harvest(u, closestResource, selfBase);
             } else {
-                move(u, closestResource.getX(), closestResource.getY());
+                actions.put(u, new MoveAdjacent(u, closestResource.getX(), closestResource.getY(), pf));
             }
-        } else if (maxact == 1) move(u, selfBuilding.getX(), selfBuilding.getY());
+        } else if (maxact == 1) {
+            if (u.getType() == workerType) {
+                harvest(u, closestResource, selfBase);
+            } else {
+                actions.put(u, new MoveAdjacent(u, selfBuilding.getX(), selfBuilding.getY(), pf));
+            }
+        }
         else if (maxact == 2) attack(u, enemyUnit);
         else if (maxact == 3) attack(u, enemyBuilding);
-        else if (maxact == 5) train(u, baseType);
-        else if (maxact == 6) train(u, barracksType);
+        else if (maxact == 4) train(u, baseType);
+        else if (maxact == 5) train(u, barracksType);
     }
 
     @Override

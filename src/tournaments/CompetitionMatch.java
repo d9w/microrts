@@ -85,7 +85,7 @@ public class CompetitionMatch {
             ai1.reset();
             ai2.reset();
 
-            System.out.print("debug " + map_idx + " " + ai1 + " " + ai2);
+            System.out.print("[" + map_idx + " " + ai1 + " " + ai2);
 
             GameState gs = new GameState(pgs.clone(),utt);
             PhysicalGameStateJFrame w = null;
@@ -156,7 +156,7 @@ public class CompetitionMatch {
                 sdiff = 1.0;
             }
             score += sdiff;
-            System.out.println(" " + winner + " " + sdiff + " " + score);
+            System.out.print(" " + winner + " " + score + "] ");
         }
         score /= (maps.size());
         return score;

@@ -37,7 +37,7 @@ public class RTSMatch extends GRNGenomeEvaluator {
     public RTSMatch() {
         name = "RTSMatch";
         numGRNInputs = 14;
-        numGRNOutputs = 7;
+        numGRNOutputs = 6;
         r = new Random();
         utt = new UnitTypeTable();
         maps = new LinkedList<PhysicalGameState>();
@@ -61,6 +61,15 @@ public class RTSMatch extends GRNGenomeEvaluator {
         GRNModel grn = buildGRNFromGenome(aGenome);
         if (switchOpp == generation) {
             opponent += 1;
+            try {
+                if (opponent > 4) {
+                    maps.add(PhysicalGameState.load("maps/BroodWar/(4)BloodBath.scmB.xml",utt));
+                    gameLengths = new int[]{3000, 6000, 8000};
+                    sides = new int[]{0, 1, 0, 1};
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             switchOpp = 0;
         }
         AI player = new GRNAI(utt, new AStarPathFinding(), grn);
@@ -78,7 +87,7 @@ public class RTSMatch extends GRNGenomeEvaluator {
             opp = new WorkerRush(utt, new BFSPathFinding());
             opp2 = new NaiveMCTS(100, -1, 100, 1, 1.00f, 0.0f, 0.25f, new RandomBiasedAI(), new SimpleSqrtEvaluationFunction3(), true);
         } else if (opponent > 4) {
-            opp = new WorkerRush(utt, new BFSPathFinding());
+            opp = new NaiveMCTS(100, -1, 100, 1, 1.00f, 0.0f, 0.25f, new RandomBiasedAI(), new SimpleSqrtEvaluationFunction3(), true);
             opp2 = new GRNAI(utt, new AStarPathFinding(), best);
         }
         try {
@@ -89,10 +98,10 @@ public class RTSMatch extends GRNGenomeEvaluator {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        System.out.println("eval " + opponent + " " + aGenome.toString() + " " + fitness);
+        System.out.println(" " + fitness);
 
         if (opponent < 4) {
-            if (fitness >= 0.8) {
+            if (fitness == 1.0) {
                 switchOpp = generation+1;
                 best = grn.copy();
             }
