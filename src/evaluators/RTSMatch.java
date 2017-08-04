@@ -42,11 +42,11 @@ public class RTSMatch extends GRNGenomeEvaluator {
             maps.add(PhysicalGameState.load("maps/8x8/basesWorkers8x8A.xml",utt));
             maps.add(PhysicalGameState.load("maps/16x16/basesWorkers16x16A.xml",utt));
             maps.add(PhysicalGameState.load("maps/BWDistantResources32x32.xml",utt));
-            maps.add(PhysicalGameState.load("maps/BroodWar/(4)BloodBath.scmB.xml",utt));
+            // maps.add(PhysicalGameState.load("maps/BroodWar/(4)BloodBath.scmB.xml",utt));
         } catch (Exception e) {
             e.printStackTrace();
         }
-        gameLengths = new int[]{3000, 4000, 5000, 6000, 8000};
+        gameLengths = new int[]{3000, 4000, 6000};
         c = new CompetitionMatch();
         c.visualize = false;
     }
