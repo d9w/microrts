@@ -123,13 +123,6 @@ public class GRNAligningCrossoverOperator extends GRNCrossoverOperator {
 		} else {
 			offspring.setDelta(parent2.getDelta());
 		}
-    for (int i=0; i<5; i++) {
-        if (rng.nextDouble()<0.5) {
-            offspring.setWeight(parent1.getWeights[i], i);
-        } else {
-            offspring.setWeight(parent2.getWeights[i], i);
-        }
-    }
 
 		offspring.parentBestFitness=Math.max(parent1.getLastFitness(), parent2.getLastFitness());
 

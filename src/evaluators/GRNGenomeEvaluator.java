@@ -30,7 +30,7 @@ public abstract class GRNGenomeEvaluator {
 		for (GRNGene gr : aGenome.getRegulatoryGenes()) {
 			prots.add(gr.getProtein());
 		}
-		GRNModel p=new GRNModel(prots, aGenome.getBeta(), aGenome.getDelta(), aGenome.getWeights());
+		GRNModel p=new GRNModel(prots, aGenome.getBeta(), aGenome.getDelta());
 		return p;
 	}
 

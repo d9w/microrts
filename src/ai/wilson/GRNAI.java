@@ -58,7 +58,7 @@ public class GRNAI extends AbstractionLayerAI {
         heavyType = utt.getUnitType("Heavy");
         rangedType = utt.getUnitType("Ranged");
         mobileTypes = new UnitType[]{workerType, lightType, heavyType, rangedType};
-        unitFactors = a_grn.weights;
+        unitFactors = new double[]{1.0, 2.0, 3.0, 2.0, 5.0};
         grn = a_grn;
         grn.reset();
         grn.evolve(25);
@@ -129,7 +129,6 @@ public class GRNAI extends AbstractionLayerAI {
                     makeUnits[0] = true;
                 }
             }
-            // System.out.println("Unit weights: " + Arrays.toString(weightedUnitCounts));
         }
 
         boolean makeUnit = false;

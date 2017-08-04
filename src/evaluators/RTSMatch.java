@@ -89,8 +89,8 @@ public class RTSMatch extends GRNGenomeEvaluator {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        System.out.println("eval " + opponent + " " + Arrays.toString(grn.weights)
-                           + " " + grn.size() + " " + fitness);
+        System.out.println("eval " + opponent + " " + aGenome.toString() + " " + fitness);
+
         if (opponent < 4) {
             if (fitness >= 0.8) {
                 switchOpp = generation+1;

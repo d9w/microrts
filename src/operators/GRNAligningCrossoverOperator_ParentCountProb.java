@@ -133,16 +133,6 @@ public class GRNAligningCrossoverOperator_ParentCountProb extends GRNCrossoverOp
 		} else {
 			offspring.setDelta(parent2.getDelta());
 		}
-    for (int i=0; i<5; i++) {
-        double source = rng.nextDouble();
-        if (source<0.25) {
-            offspring.setWeight(parent1.getWeights()[i], i);
-        } else if (source<0.5) {
-            offspring.setWeight(parent2.getWeights()[i], i);
-        } else {
-            offspring.setWeight(rng.nextDouble()*(parent1.getWeightsMax()-parent1.getWeightsMin())+parent1.getWeightsMin(), i);
-        }
-    }
 
 		offspring.parentBestFitness=Math.max(parent1.getLastFitness(), parent2.getLastFitness());
 

@@ -19,9 +19,6 @@ public class GRNGenome implements Comparable<Object> {
 	protected double betaMin=0.5;
 	protected double deltaMax=2.0;
 	protected double deltaMin=0.5;
-  protected double[] weights;
-  protected double weightsMax=5.0;
-  protected double weightsMin=0.1;
 //	protected int nbEval=0;
 	
 	protected boolean hasBeenEvaluated=false;
@@ -36,27 +33,24 @@ public class GRNGenome implements Comparable<Object> {
 		allGenes=new Hashtable<Long, GRNGene>();
 		beta=1.0;
 		delta=1.0;
-    weights = new double[5];
 	}
 	
-  public GRNGenome(Enumeration<GRNGene> nGenes, double nBeta, double nDelta, double[] nweights) {
+  public GRNGenome(Enumeration<GRNGene> nGenes, double nBeta, double nDelta) {
 		this();
 		while (nGenes.hasMoreElements()) {
 			addGene(nGenes.nextElement());
 		}
 		beta=nBeta;
 		delta=nDelta;
-    weights=nweights;
 	}
 	
-  public GRNGenome(List<GRNGene> nGenes, double nBeta, double nDelta, double[] nweights) {
+  public GRNGenome(List<GRNGene> nGenes, double nBeta, double nDelta) {
 		this();
 		for (GRNGene g : nGenes) {
 			addGene(g);
 		}
 		beta=nBeta;
 		delta=nDelta;
-    weights=nweights;
 	}
 	
 	public void addGene(GRNGene nGene) {
@@ -150,9 +144,6 @@ public class GRNGenome implements Comparable<Object> {
 			// take beta and delta to the distance calculation
 			distance+=Math.abs(beta-g.beta)/(betaMax-betaMin);
 			distance+=Math.abs(delta-g.delta)/(deltaMax-deltaMin);
-      for (int i=0; i<5; i++) {
-          distance += Math.abs(weights[i]-g.weights[i])/(weightsMax-weightsMin);
-      }
 			return ((double)distance)/(gl.size()+7.0);
 		} else {
 			return ((double)distance)/gl.size();
@@ -191,16 +182,8 @@ public class GRNGenome implements Comparable<Object> {
 		this.deltaMin = deltaMin;
 	}
 
-  public double getWeightsMax() {
-    return weightsMax;
-	}
-
-  public double getWeightsMin() {
-    return weightsMin;
-  }
-
 	public GRNGenome clone() {
-    return new GRNGenome(allGenes.elements(), beta, delta, weights);
+    return new GRNGenome(allGenes.elements(), beta, delta);
 	}
 
 	public double getLastFitness() {
@@ -270,17 +253,6 @@ public class GRNGenome implements Comparable<Object> {
 			hasBeenEvaluated=false;
 			delta=nDelta;
 		}
-	}
-
-  public double[] getWeights() {
-    return weights;
-	}
-
-  public void setWeight(double nweight, int ind) {
-    if (weights[ind] != nweight) {
-      hasBeenEvaluated=false;
-      weights[ind]=nweight;
-    }
 	}
 
 	public int size() {
