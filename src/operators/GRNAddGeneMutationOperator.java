@@ -35,6 +35,11 @@ public class GRNAddGeneMutationOperator extends GRNMutationOperator {
 		if (aGenome.size()<grnMaxSize) {
 			aGenome.addGene(GRNGene.generateRandomRegulatoryGene(rng));
 			aGenome.parentBestFitness=aGenome.getLastFitness();
+      for (int i=0; i<5; i++) {
+          if (rng.nextDouble() > 0.5) {
+              aGenome.setWeight(rng.nextDouble()*(aGenome.getWeightsMax()-aGenome.getWeightsMin())+aGenome.getWeightsMin(), i);
+          }
+      }
 			aGenome.hasBeenModified();
 			return true;
 		} else {

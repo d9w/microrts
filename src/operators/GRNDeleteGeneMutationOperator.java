@@ -33,6 +33,11 @@ public class GRNDeleteGeneMutationOperator extends GRNMutationOperator {
 	public boolean mutateByModifying(GRNGenome aGenome, Random rng) {
 		if (aGenome.size()>grnMinSize) {
 			aGenome.parentBestFitness=aGenome.getLastFitness();
+      for (int i=0; i<5; i++) {
+          if (rng.nextDouble() > 0.5) {
+              aGenome.setWeight(rng.nextDouble()*(aGenome.getWeightsMax()-aGenome.getWeightsMin())+aGenome.getWeightsMin(), i);
+          }
+      }
 			aGenome.hasBeenModified();
 			return aGenome.removeRandomlyRegulatoryGene(rng);
 		} else {
