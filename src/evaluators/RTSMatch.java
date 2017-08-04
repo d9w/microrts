@@ -47,7 +47,7 @@ public class RTSMatch extends GRNGenomeEvaluator {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        gameLengths = new int[]{3000, 4000, 6000};
+        gameLengths = new int[]{3000, 3000, 3000};
         sides = new int[]{0, 1, 0};
         c = new CompetitionMatch();
         c.visualize = false;

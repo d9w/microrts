@@ -5,12 +5,15 @@ import ai.core.AIWithComputationBudget;
 import ai.core.ContinuingAI;
 import ai.core.InterruptibleAI;
 import ai.RandomAI;
+import ai.RandomBiasedAI;
 import ai.abstraction.LightRush;
 import ai.abstraction.WorkerRush;
 import ai.abstraction.HeavyRush;
 import ai.abstraction.pathfinding.BFSPathFinding;
 import ai.abstraction.pathfinding.AStarPathFinding;
+import ai.evaluation.EvaluationFunction;
 import ai.evaluation.SimpleSqrtEvaluationFunction3;
+import ai.evaluation.LanchesterEvaluationFunction;
 import ai.wilson.GRNAI;
 import gui.PhysicalGameStateJFrame;
 import gui.PhysicalGameStatePanel;
@@ -82,6 +85,8 @@ public class CompetitionMatch {
             ai1.reset();
             ai2.reset();
 
+            System.out.print("debug " + map_idx + " " + ai1 + " " + ai2);
+
             GameState gs = new GameState(pgs.clone(),utt);
             PhysicalGameStateJFrame w = null;
             if (visualize) w = PhysicalGameStatePanel.newVisualizer(gs, 600, 600, false);
@@ -140,13 +145,18 @@ public class CompetitionMatch {
                         (gs.getTime() < gameLengths[map_idx]));
 
             if (w!=null) w.dispose();
+            double sdiff = 0.0;
             int winner = gs.winner();
-            System.out.println("debug " + map_idx + " " + ai1 + " " + ai2 + " " + winner);
             if (winner == -1) {
-                if (crashed != side && timedout != side) score += 0.5;
+                if (crashed != side && timedout != side) {
+                    EvaluationFunction ef = new LanchesterEvaluationFunction();
+                    sdiff = (double) (ef.upperBound(gs)+ef.evaluate(side, 1-side, gs))/(2.0*ef.upperBound(gs));
+                }
             } else if (winner == side) {
-                score += 1.0;
+                sdiff = 1.0;
             }
+            score += sdiff;
+            System.out.println(" " + winner + " " + sdiff + " " + score);
         }
         score /= (maps.size());
         return score;
@@ -164,11 +174,11 @@ public class CompetitionMatch {
 
         GRNModel grn = GRNModel.loadFromFile(args[0]);
 
-        int[] gameLengths = {300, 400, 600, 800};
+        int[] gameLengths = {3000, 4000, 6000, 8000};
         int[] sides = {0, 1, 0, 1};
 
         double score = runMatches(new GRNAI(utt, new AStarPathFinding(), grn),
-                                  new RandomAI(),
+                                  new LightRush(utt, new BFSPathFinding()),
                                   maps, gameLengths, sides, utt);
         System.out.println(score);
     }
