@@ -9,10 +9,12 @@ import ai.abstraction.LightRush;
 import ai.abstraction.WorkerRush;
 import ai.abstraction.HeavyRush;
 import ai.abstraction.pathfinding.BFSPathFinding;
+import ai.abstraction.pathfinding.AStarPathFinding;
 import ai.evaluation.SimpleSqrtEvaluationFunction3;
 import ai.wilson.GRNAI;
 import gui.PhysicalGameStateJFrame;
 import gui.PhysicalGameStatePanel;
+import grn.GRNModel;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
@@ -139,7 +141,7 @@ public class CompetitionMatch {
 
             if (w!=null) w.dispose();
             int winner = gs.winner();
-            // System.out.println("DEBUG " + map_idx + " " + ai1 + " " + ai2 + " " + winner);
+            System.out.println("debug " + map_idx + " " + ai1 + " " + ai2 + " " + winner);
             if (winner == -1) {
                 if (crashed != side && timedout != side) score += 0.5;
             } else if (winner == side) {
@@ -160,11 +162,13 @@ public class CompetitionMatch {
         maps.add(PhysicalGameState.load("maps/BWDistantResources32x32.xml",utt));
         maps.add(PhysicalGameState.load("maps/BroodWar/(4)BloodBath.scmB.xml",utt));
 
-        int[] gameLengths = {3000, 4000, 5000, 6000, 8000};
-        int[] sides = {0, 1, 0, 1, 0};
+        GRNModel grn = GRNModel.loadFromFile(args[0]);
 
-        double score = runMatches(new HeavyRush(utt, new BFSPathFinding()),
-                                  new HeavyRush(utt, new BFSPathFinding()),
+        int[] gameLengths = {300, 400, 600, 800};
+        int[] sides = {0, 1, 0, 1};
+
+        double score = runMatches(new GRNAI(utt, new AStarPathFinding(), grn),
+                                  new RandomAI(),
                                   maps, gameLengths, sides, utt);
         System.out.println(score);
     }

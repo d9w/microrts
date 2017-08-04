@@ -71,7 +71,7 @@ public class RTSMatch extends GRNGenomeEvaluator {
             opp = new GRNAI(utt, new AStarPathFinding(), best);
         }
         try {
-            fitness = CompetitionMatch.runMatches(player, opp, maps, gameLengths, sides,utt);
+            fitness = c.runMatches(player, opp, maps, gameLengths, sides,utt);
             // fitness = r.nextDouble();
         } catch (Exception e) {
             e.printStackTrace();
