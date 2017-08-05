@@ -49,7 +49,7 @@ public class RTSMatch extends GRNGenomeEvaluator {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        gameLengths = new int[]{3000, 6000};
+        gameLengths = new int[]{1500, 3000};
         sides = new int[]{0, 1, 0};
         c = new CompetitionMatch();
         c.visualize = true;
@@ -62,9 +62,9 @@ public class RTSMatch extends GRNGenomeEvaluator {
         if (switchOpp == generation) {
             opponent += 1;
             try {
-                if (opponent > 4) {
+                if (opponent > 3) {
                     maps.add(PhysicalGameState.load("maps/BroodWar/(4)BloodBath.scmB.xml",utt));
-                    gameLengths = new int[]{3000, 6000, 8000};
+                    gameLengths = new int[]{1500, 3000, 4000};
                     sides = new int[]{0, 1, 0, 1};
                 }
             } catch (Exception e) {
@@ -74,34 +74,32 @@ public class RTSMatch extends GRNGenomeEvaluator {
         }
         AI player = new GRNAI(utt, new AStarPathFinding(), grn);
         AI opp = new RandomAI();
-        AI opp2 = new RandomAI();
+        AI opp2 = new RandomBiasedAI();
         if (opponent == 1) {
-            opp2 = new RandomBiasedAI();
-        } else if (opponent == 2) {
             opp = new RandomBiasedAI();
             opp2 = new LightRush(utt, new BFSPathFinding());
-        } else if (opponent == 3) {
+        } else if (opponent == 2) {
             opp = new LightRush(utt, new BFSPathFinding());
             opp2 = new WorkerRush(utt, new BFSPathFinding());
-        } else if (opponent == 4) {
+        } else if (opponent == 3) {
             opp = new WorkerRush(utt, new BFSPathFinding());
             opp2 = new NaiveMCTS(100, -1, 100, 1, 1.00f, 0.0f, 0.25f, new RandomBiasedAI(), new SimpleSqrtEvaluationFunction3(), true);
-        } else if (opponent > 4) {
+        } else if (opponent > 3) {
             opp = new NaiveMCTS(100, -1, 100, 1, 1.00f, 0.0f, 0.25f, new RandomBiasedAI(), new SimpleSqrtEvaluationFunction3(), true);
             opp2 = new GRNAI(utt, new AStarPathFinding(), best);
         }
         try {
             fitness = c.runMatches(player, opp, maps, gameLengths, sides, utt);
-            fitness+= c.runMatches(player, opp2, maps2, new int[]{4000}, new int[]{0}, utt);
+            fitness+= c.runMatches(player, opp2, maps2, new int[]{2000}, new int[]{0}, utt);
             fitness /= 2.0;
             // fitness = r.nextDouble();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        System.out.println(" " + fitness);
+        System.out.println(" " + opponent + " " + generation + " " + fitness);
 
-        if (opponent < 4) {
-            if (fitness == 1.0) {
+        if (opponent <= 3) {
+            if (fitness > 0.0) {
                 switchOpp = generation+1;
                 best = grn.copy();
             }

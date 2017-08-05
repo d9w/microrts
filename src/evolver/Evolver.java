@@ -36,7 +36,7 @@ public class Evolver {
 	public int randomSeed=(int)(new Date().getTime());
 	public int maxNumGen=Integer.MAX_VALUE;
 	public GRNGenomeEvaluator evaluator=null;
-  public int populationSize = 20;
+  public int populationSize = 15;
 	public double speciationThreshold = 0.15;
 	public double crossoverRate = 0.25;
 	public double mutationRate = 0.75;
